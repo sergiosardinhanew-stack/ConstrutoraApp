@@ -1,0 +1,194 @@
+@model ConstrutoraApp.Models.Custo
+
+@{
+    ViewData["Title"] = "Editar Custo";
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-pencil"></i> Editar Custo</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="mb-3">
+                    <label asp-for="EmpreendimentoId" class="form-label"></label>
+                    <select asp-for="EmpreendimentoId" class="form-select" asp-items="ViewBag.EmpreendimentoId">
+                        <option value="">Selecione um empreendimento</option>
+                    </select>
+                    <span asp-validation-for="EmpreendimentoId" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Tipo" class="form-label"></label>
+                        <select asp-for="Tipo" class="form-select">
+                            <option value="">Selecione...</option>
+                            <option value="Material">Material</option>
+                            <option value="Mão de Obra">Mão de Obra</option>
+                            <option value="Imposto">Imposto</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                        <span asp-validation-for="Tipo" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Valor" class="form-label"></label>
+                        <input asp-for="Valor" class="form-control" type="number" step="0.01" />
+                        <span asp-validation-for="Valor" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Descricao" class="form-label"></label>
+                    <textarea asp-for="Descricao" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Descricao" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Data" class="form-label"></label>
+                        <input asp-for="Data" class="form-control" type="date" />
+                        <span asp-validation-for="Data" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Fornecedor" class="form-label"></label>
+                        <input asp-for="Fornecedor" class="form-control" />
+                        <span asp-validation-for="Fornecedor" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="FormaPagamento" class="form-label">
+                        <strong>Forma de Pagamento</strong>
+                    </label>
+                    <select id="FormaPagamento" asp-for="FormaPagamento" class="form-select">
+                        <option value="">Selecione...</option>
+                        <option value="PIX">PIX</option>
+                        <option value="Débito">Débito</option>
+                        <option value="Crédito">Crédito</option>
+                        <option value="Boleto">Boleto</option>
+                    </select>
+                    <span asp-validation-for="FormaPagamento" class="text-danger"></span>
+                </div>
+
+                <!-- Campos para Crédito -->
+                <div id="camposCredito" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="NumeroParcelas" class="form-label">
+                                <strong>Número de Parcelas</strong>
+                            </label>
+                            <select id="NumeroParcelas" asp-for="NumeroParcelas" class="form-select">
+                                <option value="">Selecione...</option>
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">@i parcela(s)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="NumeroParcelas" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="ValorParcela" class="form-label">
+                                <strong>Valor da Parcela</strong>
+                            </label>
+                            <input id="ValorParcela" asp-for="ValorParcela" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="ValorParcela" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="DataVencimentoParcela" class="form-label">
+                                <strong>Data de Vencimento da Parcela</strong>
+                            </label>
+                            <input id="DataVencimentoParcela" asp-for="DataVencimentoParcela" class="form-control" type="date" />
+                            <span asp-validation-for="DataVencimentoParcela" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campo para Boleto -->
+                <div id="campoBoleto" style="display: none;">
+                    <div class="mb-3">
+                        <label asp-for="DataVencimentoBoleto" class="form-label">
+                            <strong>Data de Vencimento do Boleto</strong>
+                        </label>
+                        <input id="DataVencimentoBoleto" asp-for="DataVencimentoBoleto" class="form-control" type="date" />
+                        <span asp-validation-for="DataVencimentoBoleto" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label">
+                        <strong>Status</strong>
+                    </label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="">Selecione...</option>
+                        <option value="Pago">Pago</option>
+                        <option value="Pendente">Pendente</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle"></i> Salvar Alterações
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Função para mostrar/ocultar campos baseado na forma de pagamento
+            function atualizarCamposFormaPagamento() {
+                var formaPagamento = $('#FormaPagamento').val();
+                var camposCredito = $('#camposCredito');
+                var campoBoleto = $('#campoBoleto');
+
+                // Ocultar todos os campos primeiro
+                camposCredito.hide();
+                campoBoleto.hide();
+
+                // Não limpar campos quando ocultados em modo edição para preservar dados existentes
+
+                // Mostrar campos conforme a forma de pagamento
+                if (formaPagamento === 'Crédito') {
+                    camposCredito.show();
+                } else if (formaPagamento === 'Boleto') {
+                    campoBoleto.show();
+                }
+            }
+
+            // Evento quando a forma de pagamento mudar
+            $('#FormaPagamento').change(function() {
+                atualizarCamposFormaPagamento();
+            });
+
+            // Calcular valor da parcela automaticamente
+            $('#NumeroParcelas, #Valor').change(function() {
+                var valorTotal = parseFloat($('#Valor').val()) || 0;
+                var numeroParcelas = parseInt($('#NumeroParcelas').val()) || 0;
+                
+                if (numeroParcelas > 0 && valorTotal > 0) {
+                    var valorParcela = valorTotal / numeroParcelas;
+                    $('#ValorParcela').val(valorParcela.toFixed(2));
+                }
+            });
+
+            // Inicializar campos ao carregar a página
+            // Aguardar um pouco para garantir que os valores do modelo foram carregados
+            setTimeout(function() {
+                atualizarCamposFormaPagamento();
+            }, 100);
+        });
+    </script>
+}
+

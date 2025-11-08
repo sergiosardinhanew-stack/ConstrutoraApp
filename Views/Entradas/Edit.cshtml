@@ -1,0 +1,149 @@
+@model ConstrutoraApp.Models.Entrada
+
+@{
+    ViewData["Title"] = "Editar Entrada";
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-pencil"></i> Editar Entrada</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="mb-3">
+                    <label asp-for="EmpreendimentoId" class="form-label">
+                        <strong>Empreendimento</strong> <span class="text-danger">*</span>
+                    </label>
+                    <select id="EmpreendimentoId" asp-for="EmpreendimentoId" class="form-select" asp-items="ViewBag.EmpreendimentoId" required>
+                    </select>
+                    <span asp-validation-for="EmpreendimentoId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ImovelId" class="form-label">
+                        <strong>Imóvel</strong> <span class="text-muted">(Opcional)</span>
+                    </label>
+                    <select id="ImovelId" asp-for="ImovelId" class="form-select" asp-items="ViewBag.ImovelId">
+                        <option value="">Selecione um imóvel (opcional)</option>
+                    </select>
+                    <span asp-validation-for="ImovelId" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Tipo" class="form-label">
+                            <strong>Tipo</strong> <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="Tipo" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Parcela">Parcela</option>
+                            <option value="Anual">Anual</option>
+                            <option value="Investimento">Investimento</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                        <span asp-validation-for="Tipo" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Valor" class="form-label"></label>
+                        <input asp-for="Valor" class="form-control" type="number" step="0.01" />
+                        <span asp-validation-for="Valor" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Descricao" class="form-label"></label>
+                    <textarea asp-for="Descricao" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Descricao" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Data" class="form-label"></label>
+                    <input asp-for="Data" class="form-control" type="date" />
+                    <span asp-validation-for="Data" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle"></i> Salvar Alterações
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Função para carregar imóveis
+            function carregarImoveis(empreendimentoId, imovelIdSelecionado) {
+                var imovelSelect = $('#ImovelId');
+                
+                // Limpar o select de imóveis
+                imovelSelect.empty();
+                imovelSelect.append('<option value="">Carregando imóveis...</option>');
+                imovelSelect.prop('disabled', true);
+                
+                if (empreendimentoId) {
+                    // Fazer requisição AJAX para buscar os imóveis do empreendimento
+                    $.ajax({
+                        url: '@Url.Action("GetImoveisByEmpreendimento", "Entradas")',
+                        type: 'GET',
+                        data: { empreendimentoId: empreendimentoId },
+                        success: function(data) {
+                            imovelSelect.empty();
+                            imovelSelect.append('<option value="">Selecione um imóvel (opcional)</option>');
+                            if (data && data.length > 0) {
+                                $.each(data, function(index, imovel) {
+                                    var displayText = imovel.numero + ' - ' + imovel.tipo + ' (' + imovel.status + ')';
+                                    var selected = (imovelIdSelecionado && imovel.id == imovelIdSelecionado) ? 'selected' : '';
+                                    imovelSelect.append('<option value="' + imovel.id + '" ' + selected + '>' + displayText + '</option>');
+                                });
+                                imovelSelect.prop('disabled', false);
+                            } else {
+                                imovelSelect.append('<option value="">Nenhum imóvel encontrado para este empreendimento</option>');
+                                imovelSelect.prop('disabled', true);
+                            }
+                        },
+                        error: function() {
+                            imovelSelect.empty();
+                            imovelSelect.append('<option value="">Erro ao carregar imóveis</option>');
+                            imovelSelect.prop('disabled', true);
+                        }
+                    });
+                } else {
+                    imovelSelect.empty();
+                    imovelSelect.append('<option value="">Primeiro selecione um empreendimento</option>');
+                    imovelSelect.prop('disabled', true);
+                }
+            }
+
+            // Carregar imóveis quando o empreendimento mudar
+            $('#EmpreendimentoId').change(function() {
+                var empreendimentoId = $(this).val();
+                carregarImoveis(empreendimentoId, null);
+            });
+
+            // Se já houver um empreendimento selecionado (em caso de erro de validação), carregar os imóveis
+            setTimeout(function() {
+                var imovelIdSelecionado = $('#ImovelId').val();
+                var empreendimentoSelecionado = $('#EmpreendimentoId').val();
+                if (empreendimentoSelecionado && imovelIdSelecionado) {
+                    carregarImoveis(empreendimentoSelecionado, imovelIdSelecionado);
+                } else if (empreendimentoSelecionado) {
+                    carregarImoveis(empreendimentoSelecionado, null);
+                }
+            }, 100);
+        });
+    </script>
+}
+

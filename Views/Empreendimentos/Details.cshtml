@@ -1,0 +1,140 @@
+@model ConstrutoraApp.Models.Empreendimento
+
+@{
+    ViewData["Title"] = "Detalhes do Empreendimento";
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-building"></i> Detalhes do Empreendimento</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Nome)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Nome)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Tipo)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Tipo)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-@(Model.Status == "Concluído" ? "success" : Model.Status == "Em construção" ? "warning" : "info")">
+                        @Html.DisplayFor(model => model.Status)
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Endereco)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Endereco)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Descricao)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Descricao)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DataInicio)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.DataInicio)</dd>
+
+                @if (Model.DataEntrega.HasValue)
+                {
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DataEntrega)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.DataEntrega)</dd>
+                }
+
+                @if (Model.ValorPrevisto.HasValue)
+                {
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorPrevisto)</dt>
+                    <dd class="col-sm-9">R$ @Model.ValorPrevisto.Value.ToString("N2")</dd>
+                }
+
+                @if (Model.ValorRealizado.HasValue)
+                {
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorRealizado)</dt>
+                    <dd class="col-sm-9">R$ @Model.ValorRealizado.Value.ToString("N2")</dd>
+                }
+            </dl>
+
+            <!-- Imóveis por Status -->
+            @if (ViewBag.TotalImoveis > 0)
+            {
+                <div class="mt-4 mb-4">
+                    <h4><i class="bi bi-house-door"></i> Imóveis por Status</h4>
+                    <div class="row g-3 mt-2">
+                        @{
+                            var imoveisPorStatus = ViewBag.ImoveisPorStatus as Dictionary<string, int>;
+                            var totalImoveis = (int)ViewBag.TotalImoveis;
+                        }
+                        
+                        @if (imoveisPorStatus != null && imoveisPorStatus.ContainsKey("Disponível"))
+                        {
+                            <div class="col-md-4">
+                                <div class="card border-info">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-info">Disponível</h5>
+                                        <h2 class="mb-0">@imoveisPorStatus["Disponível"]</h2>
+                                        <small class="text-muted">de @totalImoveis imóvel(is)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (imoveisPorStatus != null && imoveisPorStatus.ContainsKey("Reservado"))
+                        {
+                            <div class="col-md-4">
+                                <div class="card border-warning">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-warning">Reservado</h5>
+                                        <h2 class="mb-0">@imoveisPorStatus["Reservado"]</h2>
+                                        <small class="text-muted">de @totalImoveis imóvel(is)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (imoveisPorStatus != null && imoveisPorStatus.ContainsKey("Vendido"))
+                        {
+                            <div class="col-md-4">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-success">Vendido</h5>
+                                        <h2 class="mb-0">@imoveisPorStatus["Vendido"]</h2>
+                                        <small class="text-muted">de @totalImoveis imóvel(is)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (imoveisPorStatus != null && imoveisPorStatus.ContainsKey("Sem Status"))
+                        {
+                            <div class="col-md-4">
+                                <div class="card border-secondary">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-secondary">Sem Status</h5>
+                                        <h2 class="mb-0">@imoveisPorStatus["Sem Status"]</h2>
+                                        <small class="text-muted">de @totalImoveis imóvel(is)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="mt-4 mb-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Nenhum imóvel cadastrado para este empreendimento.
+                    </div>
+                </div>
+            }
+
+            <div class="mb-3">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

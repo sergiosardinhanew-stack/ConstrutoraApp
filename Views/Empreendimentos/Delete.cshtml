@@ -1,0 +1,47 @@
+@model ConstrutoraApp.Models.Empreendimento
+
+@{
+    ViewData["Title"] = "Excluir Empreendimento";
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-trash text-danger"></i> Excluir Empreendimento</h1>
+    <hr />
+
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> Tem certeza que deseja excluir este empreendimento? Esta ação não pode ser desfeita.
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Nome)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Nome)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Tipo)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Tipo)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-@(Model.Status == "Concluído" ? "success" : Model.Status == "Em construção" ? "warning" : "info")">
+                        @Html.DisplayFor(model => model.Status)
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Endereco)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Endereco)</dd>
+            </dl>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Excluir
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+

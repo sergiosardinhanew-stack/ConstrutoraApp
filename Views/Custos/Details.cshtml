@@ -1,0 +1,84 @@
+@model ConstrutoraApp.Models.Custo
+
+@{
+    ViewData["Title"] = "Detalhes do Custo";
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-currency-dollar"></i> Detalhes do Custo</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Descricao)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Descricao)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Tipo)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Tipo)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Empreendimento)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Empreendimento!.Nome)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Valor)</dt>
+                <dd class="col-sm-9">R$ @Model.Valor.ToString("N2")</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Data)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Data)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Fornecedor)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Fornecedor)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FormaPagamento)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.FormaPagamento)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Status == "Pago")
+                    {
+                        <span class="badge bg-success">@Model.Status</span>
+                    }
+                    else if (Model.Status == "Pendente")
+                    {
+                        <span class="badge bg-warning text-dark">@Model.Status</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Não informado</span>
+                    }
+                </dd>
+
+                @if (Model.FormaPagamento == "Crédito" && Model.NumeroParcelas.HasValue)
+                {
+                    <dt class="col-sm-3">Parcelamento</dt>
+                    <dd class="col-sm-9">
+                        <strong>@Model.NumeroParcelas.Value</strong> parcela(s) de 
+                        <strong>R$ @(Model.ValorParcela?.ToString("N2") ?? "0,00")</strong>
+                    </dd>
+
+                    @if (Model.DataVencimentoParcela.HasValue)
+                    {
+                        <dt class="col-sm-3">Data de Vencimento da Parcela</dt>
+                        <dd class="col-sm-9">@Model.DataVencimentoParcela.Value.ToString("dd/MM/yyyy")</dd>
+                    }
+                }
+
+                @if (Model.FormaPagamento == "Boleto" && Model.DataVencimentoBoleto.HasValue)
+                {
+                    <dt class="col-sm-3">Data de Vencimento do Boleto</dt>
+                    <dd class="col-sm-9">@Model.DataVencimentoBoleto.Value.ToString("dd/MM/yyyy")</dd>
+                }
+            </dl>
+
+            <div class="mb-3">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

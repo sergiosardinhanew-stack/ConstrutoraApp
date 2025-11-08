@@ -1,0 +1,151 @@
+@model IEnumerable<ConstrutoraApp.Models.Imovel>
+
+@{
+    ViewData["Title"] = "Imóveis";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-house-door"></i> Imóveis</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Novo Imóvel
+        </a>
+    </div>
+
+    <!-- Filtro de Status -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="statusFiltro" class="form-label">
+                        <strong>Filtrar por Status</strong>
+                    </label>
+                    @{
+                        var statusFiltroAtual = ViewBag.StatusFiltro?.ToString() ?? "";
+                    }
+                    <select name="statusFiltro" id="statusFiltro" class="form-select">
+                        <option value="">Todos os Status</option>
+                        @if (statusFiltroAtual == "Disponível")
+                        {
+                            <option value="Disponível" selected>Disponível</option>
+                        }
+                        else
+                        {
+                            <option value="Disponível">Disponível</option>
+                        }
+                        @if (statusFiltroAtual == "Reservado")
+                        {
+                            <option value="Reservado" selected>Reservado</option>
+                        }
+                        else
+                        {
+                            <option value="Reservado">Reservado</option>
+                        }
+                        @if (statusFiltroAtual == "Vendido")
+                        {
+                            <option value="Vendido" selected>Vendido</option>
+                        }
+                        else
+                        {
+                            <option value="Vendido">Vendido</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpar
+                    </a>
+                </div>
+                @if (!string.IsNullOrEmpty(ViewBag.StatusFiltro as string))
+                {
+                    <div class="col-md-4">
+                        <div class="alert alert-info mb-0 py-2">
+                            <i class="bi bi-info-circle"></i> 
+                            Mostrando imóveis com status: <strong>@ViewBag.StatusFiltro</strong>
+                        </div>
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Numero)</th>
+                        <th>@Html.DisplayNameFor(model => model.Tipo)</th>
+                        <th>@Html.DisplayNameFor(model => model.Empreendimento)</th>
+                        <th>@Html.DisplayNameFor(model => model.Metragem)</th>
+                        <th>@Html.DisplayNameFor(model => model.Quartos)</th>
+                        <th>@Html.DisplayNameFor(model => model.ValorVenda)</th>
+                        <th>Valor Recebido</th>
+                        <th>@Html.DisplayNameFor(model => model.Status)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Numero)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Tipo)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Empreendimento!.Nome)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Metragem) m²</td>
+                            <td>@Html.DisplayFor(modelItem => item.Quartos)</td>
+                            <td>R$ @item.ValorVenda.ToString("N2")</td>
+                            <td>
+                                @{
+                                    var valoresRecebidos = ViewBag.ValoresRecebidos as Dictionary<int, decimal>;
+                                    var valorRecebido = valoresRecebidos != null && valoresRecebidos.ContainsKey(item.Id) 
+                                        ? valoresRecebidos[item.Id] 
+                                        : 0;
+                                }
+                                <strong class="text-success">R$ @valorRecebido.ToString("N2")</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-@(item.Status == "Vendido" ? "success" : item.Status == "Reservado" ? "warning" : "info")">
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> 
+            @if (!string.IsNullOrEmpty(ViewBag.StatusFiltro as string))
+            {
+                <text>Nenhum imóvel encontrado com o status "<strong>@ViewBag.StatusFiltro</strong>".</text>
+            }
+            else
+            {
+                <text>Nenhum imóvel cadastrado.</text>
+            }
+            <a asp-action="Create" class="alert-link">Criar novo imóvel</a>
+        </div>
+    }
+</div>
+

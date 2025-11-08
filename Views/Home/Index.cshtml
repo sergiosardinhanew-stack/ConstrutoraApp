@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid">
+    <h1 class="mb-4">Dashboard</h1>
+    
+    <div class="row g-4 mb-4">
+        <!-- Card: Total de Empreendimentos -->
+        <div class="col-md-4">
+            <div class="card border-info shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total de Empreendimentos</h6>
+                            <h2 class="card-title mb-0 text-info">@ViewBag.TotalEmpreendimentos</h2>
+                        </div>
+                        <div class="text-info" style="font-size: 3rem;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-info bg-opacity-10">
+                    <a asp-controller="Empreendimentos" asp-action="Index" class="text-decoration-none text-info">
+                        Ver todos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Saldo -->
+        <div class="col-md-4">
+            <div class="card border-@(ViewBag.Saldo >= 0 ? "success" : "danger") shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Saldo Total</h6>
+                            <h2 class="card-title mb-0 text-@(ViewBag.Saldo >= 0 ? "success" : "danger")">
+                                R$ @ViewBag.Saldo.ToString("N2")
+                            </h2>
+                            <small class="text-muted">
+                                Entradas: R$ @ViewBag.TotalEntradas.ToString("N2") | 
+                                Custos: R$ @ViewBag.TotalCustos.ToString("N2")
+                            </small>
+                        </div>
+                        <div class="text-@(ViewBag.Saldo >= 0 ? "success" : "danger")" style="font-size: 3rem;">
+                            <i class="bi bi-@(ViewBag.Saldo >= 0 ? "arrow-up-circle" : "arrow-down-circle")"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-@(ViewBag.Saldo >= 0 ? "success" : "danger") bg-opacity-10">
+                    <a asp-controller="Relatorios" asp-action="Index" class="text-decoration-none text-@(ViewBag.Saldo >= 0 ? "success" : "danger")">
+                        Ver relatórios <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Total de Vendas -->
+        <div class="col-md-4">
+            <div class="card border-info shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">Total de Vendas</h6>
+                            <h2 class="card-title mb-0 text-info">R$ @ViewBag.TotalVendas.ToString("N2")</h2>
+                        </div>
+                        <div class="text-info" style="font-size: 3rem;">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-info bg-opacity-10">
+                    <a asp-controller="Contratos" asp-action="Index" class="text-decoration-none text-info">
+                        Ver contratos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Secundários -->
+    <div class="row g-4">
+        <!-- Card: Imóveis -->
+        <div class="col-md-3">
+            <div class="card border-secondary shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-house-door text-secondary" style="font-size: 2.5rem;"></i>
+                    <h5 class="card-title mt-3">Imóveis</h5>
+                    <p class="card-text text-muted">Gerenciar imóveis</p>
+                    <a asp-controller="Imoveis" asp-action="Index" class="btn btn-outline-secondary">
+                        Acessar <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Custos -->
+        <div class="col-md-3">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-currency-dollar text-warning" style="font-size: 2.5rem;"></i>
+                    <h5 class="card-title mt-3">Custos</h5>
+                    <p class="card-text text-muted">Gerenciar despesas</p>
+                    <a asp-controller="Custos" asp-action="Index" class="btn btn-outline-warning">
+                        Acessar <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Entradas -->
+        <div class="col-md-3">
+            <div class="card border-success shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-arrow-down-circle text-success" style="font-size: 2.5rem;"></i>
+                    <h5 class="card-title mt-3">Entradas</h5>
+                    <p class="card-text text-muted">Gerenciar receitas</p>
+                    <a asp-controller="Entradas" asp-action="Index" class="btn btn-outline-success">
+                        Acessar <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Relatórios -->
+        <div class="col-md-3">
+            <div class="card border-dark shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up text-dark" style="font-size: 2.5rem;"></i>
+                    <h5 class="card-title mt-3">Relatórios</h5>
+                    <p class="card-text text-muted">Análises e relatórios</p>
+                    <a asp-controller="Relatorios" asp-action="Index" class="btn btn-outline-dark">
+                        Acessar <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Relatórios";
+}
+
+<div class="container-fluid">
+    <h1 class="mb-4">Relatórios</h1>
+    
+    <div class="row g-4 mb-4">
+        <!-- Resumo Geral -->
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Resumo Geral</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">Total de Empreendimentos</h6>
+                                <h3 class="text-primary">@ViewBag.TotalEmpreendimentos</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">Total de Imóveis</h6>
+                                <h3 class="text-info">@ViewBag.TotalImoveis</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">Total de Contratos</h6>
+                                <h3 class="text-success">@ViewBag.TotalContratos</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">Total de Vendas</h6>
+                                <h3 class="text-success">R$ @ViewBag.TotalVendas.ToString("N2")</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financeiro -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-arrow-down-circle"></i> Entradas</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-success">R$ @ViewBag.TotalEntradas.ToString("N2")</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="bi bi-arrow-up-circle"></i> Custos</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-warning">R$ @ViewBag.TotalCustos.ToString("N2")</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saldo -->
+        <div class="col-md-12">
+            <div class="card shadow-sm border-@(ViewBag.Saldo >= 0 ? "success" : "danger")">
+                <div class="card-header bg-@(ViewBag.Saldo >= 0 ? "success" : "danger") text-white">
+                    <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Saldo Total</h5>
+                </div>
+                <div class="card-body">
+                    <h1 class="text-@(ViewBag.Saldo >= 0 ? "success" : "danger")">R$ @ViewBag.Saldo.ToString("N2")</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

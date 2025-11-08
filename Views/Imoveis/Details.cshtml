@@ -1,0 +1,67 @@
+@model ConstrutoraApp.Models.Imovel
+
+@{
+    ViewData["Title"] = "Detalhes do Imóvel";
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-house-door"></i> Detalhes do Imóvel</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Numero)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Numero)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Tipo)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Tipo)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Empreendimento)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Empreendimento!.Nome)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Metragem)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Metragem) m²</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Quartos)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Quartos)</dd>
+
+                @if (Model.Andar.HasValue)
+                {
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Andar)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Andar)</dd>
+                }
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorVenda)</dt>
+                <dd class="col-sm-9">R$ @Model.ValorVenda.ToString("N2")</dd>
+
+                <dt class="col-sm-3">Valor Recebido</dt>
+                <dd class="col-sm-9">
+                    <strong class="text-success">R$ @ViewBag.ValorRecebido.ToString("N2")</strong>
+                    @{
+                        var valorRecebido = (decimal)ViewBag.ValorRecebido;
+                        var percentual = Model.ValorVenda > 0 ? (valorRecebido / Model.ValorVenda * 100) : 0;
+                    }
+                    <small class="text-muted">(@percentual.ToString("N2")% do valor de venda)</small>
+                </dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-@(Model.Status == "Vendido" ? "success" : Model.Status == "Reservado" ? "warning" : "info")">
+                        @Html.DisplayFor(model => model.Status)
+                    </span>
+                </dd>
+            </dl>
+
+            <div class="mb-3">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
