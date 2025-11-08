@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: construtora-app
+    env: docker
+    dockerfilePath: Dockerfile
+    branch: main
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: ConnectionStrings__ConstrutoraDB
+        value: "server=sql10.freesqldatabase.com;port=3306;database=sql10806765;user=sql10806765;password=PzbMbUs8Pl;"
+      - key: ASPNETCORE_ENVIRONMENT
+        value: "Production"
