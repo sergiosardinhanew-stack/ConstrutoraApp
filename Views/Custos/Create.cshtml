@@ -31,7 +31,9 @@
                             <option value="">Selecione...</option>
                             <option value="Material">Material</option>
                             <option value="Mão de Obra">Mão de Obra</option>
-                            <option value="Imposto">Imposto</option>
+                            <option value="Equipamentos">Equipamentos</option>
+                            <option value="Terceiros">Terceiros</option>
+                            <option value="Impostos">Impostos</option>
                             <option value="Outros">Outros</option>
                         </select>
                         <span asp-validation-for="Tipo" class="text-danger"></span>
@@ -53,8 +55,16 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label asp-for="Data" class="form-label"></label>
-                        <input asp-for="Data" class="form-control" type="date" />
+                        <label asp-for="Data" class="form-label">
+                            <strong>Data</strong> <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="Data" name="Data" class="form-control" placeholder="dd/MM/yyyy" maxlength="10" required />
+                            <input type="date" id="DataDate" class="form-control" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="abrirCalendario('Data')">
+                                <i class="bi bi-calendar"></i>
+                            </button>
+                        </div>
                         <span asp-validation-for="Data" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
@@ -105,7 +115,13 @@
                             <label asp-for="DataVencimentoParcela" class="form-label">
                                 <strong>Data de Vencimento da Parcela</strong>
                             </label>
-                            <input id="DataVencimentoParcela" asp-for="DataVencimentoParcela" class="form-control" type="date" />
+                            <div class="input-group">
+                                <input type="text" id="DataVencimentoParcela" name="DataVencimentoParcela" class="form-control" placeholder="dd/MM/yyyy" maxlength="10" />
+                                <input type="date" id="DataVencimentoParcelaDate" class="form-control" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="abrirCalendario('DataVencimentoParcela')">
+                                    <i class="bi bi-calendar"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="DataVencimentoParcela" class="text-danger"></span>
                         </div>
                     </div>
@@ -117,7 +133,13 @@
                         <label asp-for="DataVencimentoBoleto" class="form-label">
                             <strong>Data de Vencimento do Boleto</strong>
                         </label>
-                        <input id="DataVencimentoBoleto" asp-for="DataVencimentoBoleto" class="form-control" type="date" />
+                        <div class="input-group">
+                            <input type="text" id="DataVencimentoBoleto" name="DataVencimentoBoleto" class="form-control" placeholder="dd/MM/yyyy" maxlength="10" />
+                            <input type="date" id="DataVencimentoBoletoDate" class="form-control" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="abrirCalendario('DataVencimentoBoleto')">
+                                <i class="bi bi-calendar"></i>
+                            </button>
+                        </div>
                         <span asp-validation-for="DataVencimentoBoleto" class="text-danger"></span>
                     </div>
                 </div>
@@ -150,7 +172,151 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
+        function abrirCalendario(tipo) {
+            var inputTexto = $('#' + tipo);
+            var inputDate = $('#' + tipo + 'Date');
+            
+            var dataTexto = inputTexto.val();
+            if (dataTexto) {
+                var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                var match = dataTexto.match(regex);
+                if (match) {
+                    var dia = match[1];
+                    var mes = match[2];
+                    var ano = match[3];
+                    inputDate.val(ano + '-' + mes + '-' + dia);
+                }
+            } else {
+                var hoje = new Date();
+                var ano = hoje.getFullYear();
+                var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                var dia = String(hoje.getDate()).padStart(2, '0');
+                inputDate.val(ano + '-' + mes + '-' + dia);
+            }
+            
+            inputDate.off('change').on('change', function() {
+                var dataSelecionada = $(this).val();
+                if (dataSelecionada) {
+                    var partes = dataSelecionada.split('-');
+                    if (partes.length === 3) {
+                        var dia = partes[2];
+                        var mes = partes[1];
+                        var ano = partes[0];
+                        inputTexto.val(dia + '/' + mes + '/' + ano);
+                    }
+                }
+                $(this).css('pointer-events', 'none');
+            });
+            
+            inputDate.css('pointer-events', 'auto');
+            inputDate.css('position', 'fixed');
+            inputDate.css('left', '50%');
+            inputDate.css('top', '50%');
+            inputDate.css('transform', 'translate(-50%, -50%)');
+            inputDate.css('z-index', '9999');
+            
+            setTimeout(function() {
+                if (inputDate[0] && typeof inputDate[0].showPicker === 'function') {
+                    inputDate[0].showPicker().catch(function() {
+                        inputDate[0].focus();
+                        inputDate[0].click();
+                    });
+                } else {
+                    inputDate[0].focus();
+                    inputDate[0].click();
+                }
+                
+                setTimeout(function() {
+                    inputDate.css('position', 'absolute');
+                    inputDate.css('left', '-9999px');
+                    inputDate.css('top', 'auto');
+                    inputDate.css('transform', 'none');
+                    inputDate.css('z-index', 'auto');
+                    inputDate.css('pointer-events', 'none');
+                }, 100);
+            }, 10);
+        }
+
         $(document).ready(function() {
+            // Máscara de data para todos os campos de data
+            $('#Data, #DataVencimentoParcela, #DataVencimentoBoleto').on('input', function() {
+                var value = $(this).val().replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.length <= 2) {
+                        value = value;
+                    } else if (value.length <= 4) {
+                        value = value.substring(0, 2) + '/' + value.substring(2);
+                    } else {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+                    }
+                    $(this).val(value);
+                }
+            });
+
+            // Converter dd/MM/yyyy para yyyy-MM-dd antes de enviar
+            $('form').on('submit', function(e) {
+                var camposData = ['Data', 'DataVencimentoParcela', 'DataVencimentoBoleto'];
+                var erro = false;
+                
+                camposData.forEach(function(campo) {
+                    var inputTexto = $('#' + campo);
+                    var inputDate = $('#' + campo + 'Date');
+                    var dataInput = inputTexto.val();
+                    
+                    if (dataInput) {
+                        var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                        var match = dataInput.match(regex);
+                        if (match) {
+                            var dia = parseInt(match[1], 10);
+                            var mes = parseInt(match[2], 10);
+                            var ano = parseInt(match[3], 10);
+                            
+                            if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                                var data = new Date(ano, mes - 1, dia);
+                                if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                                    var dataFormatada = ano + '-' + 
+                                        (mes < 10 ? '0' + mes : mes) + '-' + 
+                                        (dia < 10 ? '0' + dia : dia);
+                                    inputDate.val(dataFormatada);
+                                    // Criar campo hidden para envio
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        name: campo,
+                                        value: dataFormatada
+                                    }).appendTo('form');
+                                    inputTexto.attr('name', campo + 'Texto');
+                                } else {
+                                    erro = true;
+                                    alert('Data de ' + campo + ' inválida. Por favor, verifique o dia, mês e ano.');
+                                }
+                            } else {
+                                erro = true;
+                                alert('Data de ' + campo + ' inválida. Por favor, verifique o dia, mês e ano.');
+                            }
+                        } else {
+                            erro = true;
+                            alert('Formato de data de ' + campo + ' inválido. Use o formato dd/MM/yyyy.');
+                        }
+                    } else if (campo === 'Data') {
+                        // Data principal é obrigatória
+                        erro = true;
+                        alert('Por favor, informe a data.');
+                    }
+                });
+                
+                if (erro) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Preencher campo Data com a data de hoje ao carregar
+            var hoje = new Date();
+            var dia = String(hoje.getDate()).padStart(2, '0');
+            var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            var ano = hoje.getFullYear();
+            $('#Data').val(dia + '/' + mes + '/' + ano);
+            $('#DataDate').val(ano + '-' + mes + '-' + dia);
             // Função para mostrar/ocultar campos baseado na forma de pagamento
             function atualizarCamposFormaPagamento() {
                 var formaPagamento = $('#FormaPagamento').val();

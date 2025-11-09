@@ -1,15 +1,15 @@
 @model IEnumerable<ConstrutoraApp.Models.Pagamento>
 
 @{
-    ViewData["Title"] = "Pagamentos";
+    ViewData["Title"] = "Recebimentos";
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="bi bi-credit-card"></i> Pagamentos</h1>
+        <h1><i class="bi bi-credit-card"></i> Recebimentos</h1>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-primary" onclick="abrirModalNovoPagamento()">
-                <i class="bi bi-plus-circle"></i> Novo Pagamento
+                <i class="bi bi-plus-circle"></i> Novo Recebimento
             </button>
         </div>
     </div>
@@ -171,7 +171,7 @@
     else
     {
         <div class="alert alert-info" role="alert">
-            <i class="bi bi-info-circle"></i> Nenhum pagamento pago encontrado.
+            <i class="bi bi-info-circle"></i> Nenhum recebimento encontrado.
         </div>
     }
 </div>
@@ -182,7 +182,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalNovoPagamentoLabel">
-                    <i class="bi bi-plus-circle"></i> Novo Pagamento
+                    <i class="bi bi-plus-circle"></i> Novo Recebimento
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -244,7 +244,6 @@
                                 <i class="bi bi-calendar"></i>
                             </button>
                         </div>
-                        <small class="form-text text-muted">Formato: dd/MM/yyyy</small>
                     </div>
                 </div>
             </div>

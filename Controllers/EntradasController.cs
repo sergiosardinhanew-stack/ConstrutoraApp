@@ -85,7 +85,7 @@ namespace ConstrutoraApp.Controllers
         // POST: Entradas/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,EmpreendimentoId,ImovelId,Descricao")] Entrada entrada, string TipoPagamento, string NumeroParcelas, string ValorTotal)
+        public async Task<IActionResult> Create([Bind("Id,EmpreendimentoId,ImovelId,Descricao")] Entrada entrada, string TipoPagamento, string NumeroParcelas, string ValorTotal, string DataInicioPagamento)
         {
             // Capturar NumeroParcelas diretamente do formulário
             if (string.IsNullOrEmpty(NumeroParcelas))
@@ -93,7 +93,8 @@ namespace ConstrutoraApp.Controllers
                 NumeroParcelas = Request.Form["NumeroParcelas"].ToString();
             }
             
-            int? numeroParcelasParaCriar = null;
+            // Se não informado ou vazio, considerar como 1 (pagamento único)
+            int numeroParcelasParaCriar = 1;
             if (!string.IsNullOrEmpty(NumeroParcelas) && int.TryParse(NumeroParcelas, out int numParcelas) && numParcelas > 0)
             {
                 numeroParcelasParaCriar = numParcelas;
@@ -139,6 +140,40 @@ namespace ConstrutoraApp.Controllers
                 ModelState.AddModelError("ValorTotal", "O valor total deve ser maior que zero.");
             }
 
+            // Capturar e validar DataInicioPagamento
+            DateTime dataBase = DateTime.Today; // Valor padrão
+            if (string.IsNullOrEmpty(DataInicioPagamento))
+            {
+                DataInicioPagamento = Request.Form["DataInicioPagamento"].ToString();
+            }
+            
+            if (!string.IsNullOrEmpty(DataInicioPagamento))
+            {
+                // Tentar parse no formato yyyy-MM-dd (formato do input date)
+                if (DateTime.TryParseExact(DataInicioPagamento, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime dataParseada))
+                {
+                    dataBase = dataParseada;
+                }
+                // Tentar parse no formato dd/MM/yyyy (formato brasileiro)
+                else if (DateTime.TryParseExact(DataInicioPagamento, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime dataParseadaBr))
+                {
+                    dataBase = dataParseadaBr;
+                }
+                // Tentar parse genérico
+                else if (DateTime.TryParse(DataInicioPagamento, out DateTime dataParseadaGen))
+                {
+                    dataBase = dataParseadaGen;
+                }
+                else
+                {
+                    ModelState.AddModelError("DataInicioPagamento", "Data de início do pagamento inválida. Use o formato dd/MM/yyyy.");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("DataInicioPagamento", "A data de início do pagamento é obrigatória.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -152,7 +187,7 @@ namespace ConstrutoraApp.Controllers
                     {
                         EntradaId = entrada.Id,
                         TipoPagamento = TipoPagamento,
-                        NumeroParcelas = numeroParcelasParaCriar ?? 1,
+                        NumeroParcelas = numeroParcelasParaCriar,
                         ValorTotal = valorTotalParaCriar.Value
                     };
                     
@@ -168,7 +203,7 @@ namespace ConstrutoraApp.Controllers
                     decimal valorTotalParcelasBase = valorParcelaBase * (numeroParcelas - 1);
                     decimal valorUltimaParcela = Math.Round(valorTotal - valorTotalParcelasBase, 2, MidpointRounding.ToEven);
                     
-                    DateTime dataBase = DateTime.Today;
+                    // dataBase já foi definida acima com a data informada pelo usuário
                     
                     var pagamentosParaAdicionar = new List<Pagamento>();
                     
@@ -569,7 +604,7 @@ namespace ConstrutoraApp.Controllers
         // POST: Entradas/AdicionarParcelamento/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AdicionarParcelamento(int id, string TipoPagamento, string NumeroParcelas, string ValorTotal)
+        public async Task<IActionResult> AdicionarParcelamento(int id, string TipoPagamento, string NumeroParcelas, string ValorTotal, string DataInicioPagamento)
         {
             var entrada = await _context.Entradas.FindAsync(id);
             if (entrada == null)
@@ -577,8 +612,8 @@ namespace ConstrutoraApp.Controllers
                 return NotFound();
             }
 
-            // Capturar NumeroParcelas
-            int? numeroParcelasParaCriar = null;
+            // Capturar NumeroParcelas - Se não informado ou vazio, considerar como 1 (pagamento único)
+            int numeroParcelasParaCriar = 1;
             if (!string.IsNullOrEmpty(NumeroParcelas) && int.TryParse(NumeroParcelas, out int numParcelas) && numParcelas > 0)
             {
                 numeroParcelasParaCriar = numParcelas;
@@ -607,6 +642,40 @@ namespace ConstrutoraApp.Controllers
                 ModelState.AddModelError("ValorTotal", "O valor total deve ser maior que zero.");
             }
 
+            // Capturar e validar DataInicioPagamento
+            DateTime dataBase = DateTime.Today; // Valor padrão
+            if (string.IsNullOrEmpty(DataInicioPagamento))
+            {
+                DataInicioPagamento = Request.Form["DataInicioPagamento"].ToString();
+            }
+            
+            if (!string.IsNullOrEmpty(DataInicioPagamento))
+            {
+                // Tentar parse no formato yyyy-MM-dd (formato do input date)
+                if (DateTime.TryParseExact(DataInicioPagamento, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime dataParseada))
+                {
+                    dataBase = dataParseada;
+                }
+                // Tentar parse no formato dd/MM/yyyy (formato brasileiro)
+                else if (DateTime.TryParseExact(DataInicioPagamento, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime dataParseadaBr))
+                {
+                    dataBase = dataParseadaBr;
+                }
+                // Tentar parse genérico
+                else if (DateTime.TryParse(DataInicioPagamento, out DateTime dataParseadaGen))
+                {
+                    dataBase = dataParseadaGen;
+                }
+                else
+                {
+                    ModelState.AddModelError("DataInicioPagamento", "Data de início do pagamento inválida. Use o formato dd/MM/yyyy.");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("DataInicioPagamento", "A data de início do pagamento é obrigatória.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -616,7 +685,7 @@ namespace ConstrutoraApp.Controllers
                     {
                         EntradaId = entrada.Id,
                         TipoPagamento = TipoPagamento,
-                        NumeroParcelas = numeroParcelasParaCriar ?? 1,
+                        NumeroParcelas = numeroParcelasParaCriar,
                         ValorTotal = valorTotalParaCriar.Value
                     };
                     
@@ -632,7 +701,7 @@ namespace ConstrutoraApp.Controllers
                     decimal valorTotalParcelasBase = valorParcelaBase * (numeroParcelas - 1);
                     decimal valorUltimaParcela = Math.Round(valorTotal - valorTotalParcelasBase, 2, MidpointRounding.ToEven);
                     
-                    DateTime dataBase = DateTime.Today;
+                    // dataBase já foi definida acima com a data informada pelo usuário
                     
                     var pagamentosParaAdicionar = new List<Pagamento>();
                     

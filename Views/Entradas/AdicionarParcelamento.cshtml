@@ -57,8 +57,8 @@
                         <label for="NumeroParcelas" class="form-label">
                             <strong>Número de Parcelas</strong>
                         </label>
-                        <input type="number" id="NumeroParcelas" name="NumeroParcelas" class="form-control" min="1" step="1" />
-                        <small class="form-text text-muted">Deixe em branco para pagamento único</small>
+                        <input type="number" id="NumeroParcelas" name="NumeroParcelas" class="form-control" min="1" step="1" value="1" />
+                        <small class="form-text text-muted">Valor 1 para pagamento único</small>
                     </div>
 
                     <div class="col-md-4 mb-3">
@@ -68,6 +68,34 @@
                         <input type="number" id="ValorTotal" name="ValorTotal" class="form-control" step="0.01" min="0" required />
                         <small class="form-text text-muted">Valor total a ser parcelado</small>
                         <span class="text-danger field-validation-valid" data-valmsg-for="ValorTotal" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="DataInicioPagamento" class="form-label">
+                            <strong>Data de Início do Pagamento</strong> <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="DataInicioPagamento" name="DataInicioPagamento" class="form-control" placeholder="dd/MM/yyyy" maxlength="10" required />
+                            <input type="date" id="DataInicioPagamentoDate" class="form-control" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="abrirCalendario('DataInicioPagamento')">
+                                <i class="bi bi-calendar"></i>
+                            </button>
+                        </div>
+                        <script>
+                            // Preencher com a data de hoje ao carregar a página
+                            $(document).ready(function() {
+                                var hoje = new Date();
+                                var dia = String(hoje.getDate()).padStart(2, '0');
+                                var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                                var ano = hoje.getFullYear();
+                                $('#DataInicioPagamento').val(dia + '/' + mes + '/' + ano);
+                                $('#DataInicioPagamentoDate').val(ano + '-' + mes + '-' + dia);
+                            });
+                        </script>
+                        <small class="form-text text-muted">Data inicial para cálculo das parcelas (pode ser retroativa)</small>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="DataInicioPagamento" data-valmsg-replace="true"></span>
                     </div>
                 </div>
 
@@ -87,12 +115,141 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-        // Formatar valores para 2 casas decimais
-        document.getElementById('ValorTotal').addEventListener('blur', function() {
-            var value = parseFloat(this.value);
-            if (!isNaN(value)) {
-                this.value = value.toFixed(2);
+        function abrirCalendario(tipo) {
+            var inputTexto = $('#' + tipo);
+            var inputDate = $('#' + tipo + 'Date');
+            
+            var dataTexto = inputTexto.val();
+            if (dataTexto) {
+                var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                var match = dataTexto.match(regex);
+                if (match) {
+                    var dia = match[1];
+                    var mes = match[2];
+                    var ano = match[3];
+                    inputDate.val(ano + '-' + mes + '-' + dia);
+                }
+            } else {
+                var hoje = new Date();
+                var ano = hoje.getFullYear();
+                var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                var dia = String(hoje.getDate()).padStart(2, '0');
+                inputDate.val(ano + '-' + mes + '-' + dia);
             }
+            
+            inputDate.off('change').on('change', function() {
+                var dataSelecionada = $(this).val();
+                if (dataSelecionada) {
+                    var partes = dataSelecionada.split('-');
+                    if (partes.length === 3) {
+                        var dia = partes[2];
+                        var mes = partes[1];
+                        var ano = partes[0];
+                        inputTexto.val(dia + '/' + mes + '/' + ano);
+                    }
+                }
+                $(this).css('pointer-events', 'none');
+            });
+            
+            inputDate.css('pointer-events', 'auto');
+            inputDate.css('position', 'fixed');
+            inputDate.css('left', '50%');
+            inputDate.css('top', '50%');
+            inputDate.css('transform', 'translate(-50%, -50%)');
+            inputDate.css('z-index', '9999');
+            
+            setTimeout(function() {
+                if (inputDate[0] && typeof inputDate[0].showPicker === 'function') {
+                    inputDate[0].showPicker().catch(function() {
+                        inputDate[0].focus();
+                        inputDate[0].click();
+                    });
+                } else {
+                    inputDate[0].focus();
+                    inputDate[0].click();
+                }
+                
+                setTimeout(function() {
+                    inputDate.css('position', 'absolute');
+                    inputDate.css('left', '-9999px');
+                    inputDate.css('top', 'auto');
+                    inputDate.css('transform', 'none');
+                    inputDate.css('z-index', 'auto');
+                    inputDate.css('pointer-events', 'none');
+                }, 100);
+            }, 10);
+        }
+
+        $(document).ready(function() {
+            // Máscara de data
+            $('#DataInicioPagamento').on('input', function() {
+                var value = $(this).val().replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.length <= 2) {
+                        value = value;
+                    } else if (value.length <= 4) {
+                        value = value.substring(0, 2) + '/' + value.substring(2);
+                    } else {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+                    }
+                    $(this).val(value);
+                }
+            });
+
+            // Converter dd/MM/yyyy para yyyy-MM-dd antes de enviar
+            $('form').on('submit', function(e) {
+                var dataInicioInput = $('#DataInicioPagamento').val();
+                
+                if (dataInicioInput) {
+                    var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                    var match = dataInicioInput.match(regex);
+                    if (match) {
+                        var dia = parseInt(match[1], 10);
+                        var mes = parseInt(match[2], 10);
+                        var ano = parseInt(match[3], 10);
+                        
+                        if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                            var data = new Date(ano, mes - 1, dia);
+                            if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                                var dataFormatada = ano + '-' + 
+                                    (mes < 10 ? '0' + mes : mes) + '-' + 
+                                    (dia < 10 ? '0' + dia : dia);
+                                $('#DataInicioPagamentoDate').val(dataFormatada);
+                                $('<input>').attr({
+                                    type: 'hidden',
+                                    name: 'DataInicioPagamento',
+                                    value: dataFormatada
+                                }).appendTo('form');
+                                $('#DataInicioPagamento').attr('name', 'DataInicioPagamentoTexto');
+                            } else {
+                                e.preventDefault();
+                                alert('Data de início inválida. Por favor, verifique o dia, mês e ano.');
+                                return false;
+                            }
+                        } else {
+                            e.preventDefault();
+                            alert('Data de início inválida. Por favor, verifique o dia, mês e ano.');
+                            return false;
+                        }
+                    } else {
+                        e.preventDefault();
+                        alert('Formato de data de início inválido. Use o formato dd/MM/yyyy.');
+                        return false;
+                    }
+                } else {
+                    e.preventDefault();
+                    alert('Por favor, informe a data de início do pagamento.');
+                    return false;
+                }
+            });
+
+            // Formatar valores para 2 casas decimais
+            document.getElementById('ValorTotal').addEventListener('blur', function() {
+                var value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    this.value = value.toFixed(2);
+                }
+            });
         });
     </script>
 }
