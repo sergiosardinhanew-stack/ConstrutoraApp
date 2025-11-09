@@ -96,7 +96,7 @@
                             <td>@Html.DisplayFor(modelItem => item.Numero)</td>
                             <td>@Html.DisplayFor(modelItem => item.Tipo)</td>
                             <td>@Html.DisplayFor(modelItem => item.Empreendimento!.Nome)</td>
-                            <td>@Html.DisplayFor(modelItem => item.Metragem) m²</td>
+                            <td>@item.Metragem.ToString("N2") m²</td>
                             <td>@Html.DisplayFor(modelItem => item.Quartos)</td>
                             <td>R$ @item.ValorVenda.ToString("N2")</td>
                             <td>

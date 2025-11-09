@@ -1,82 +1,475 @@
 @{
     ViewData["Title"] = "Relatórios";
+    var itensRelatorio = ViewBag.ItensRelatorio as List<ConstrutoraApp.Models.RelatorioItem> ?? new List<ConstrutoraApp.Models.RelatorioItem>();
+    var valorTotal = ViewBag.ValorTotal as decimal? ?? 0;
+    // Verificar se há parâmetros na query string (quando o formulário é enviado)
+    var dataInicialParam = Context.Request.Query["dataInicial"].ToString();
+    var dataFinalParam = Context.Request.Query["dataFinal"].ToString();
+    var tipoParam = Context.Request.Query["tipo"].ToString();
+    
+    // Se houver parâmetros na query string, usar eles; caso contrário, usar ViewBag ou padrão
+    var dataInicial = !string.IsNullOrEmpty(dataInicialParam) ? dataInicialParam : (ViewBag.DataInicial as string ?? DateTime.Today.ToString("yyyy-MM-dd"));
+    var dataFinal = !string.IsNullOrEmpty(dataFinalParam) ? dataFinalParam : (ViewBag.DataFinal as string ?? DateTime.Today.ToString("yyyy-MM-dd"));
+    var tipo = !string.IsNullOrEmpty(tipoParam) ? tipoParam : (ViewBag.Tipo as string ?? "Todos");
+    var statusParam = Context.Request.Query["status"].ToString();
+    var status = !string.IsNullOrEmpty(statusParam) ? statusParam : (ViewBag.Status as string ?? "Todos");
+    
+    // Converter para formato brasileiro para exibição
+    DateTime dataInicialDt;
+    DateTime dataFinalDt;
+    
+    // Tentar parse com diferentes formatos
+    if (!DateTime.TryParseExact(dataInicial, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out dataInicialDt))
+    {
+        if (!DateTime.TryParseExact(dataInicial, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out dataInicialDt))
+        {
+            DateTime.TryParse(dataInicial, out dataInicialDt);
+        }
+    }
+    
+    if (!DateTime.TryParseExact(dataFinal, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out dataFinalDt))
+    {
+        if (!DateTime.TryParseExact(dataFinal, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out dataFinalDt))
+        {
+            DateTime.TryParse(dataFinal, out dataFinalDt);
+        }
+    }
+    
+    string dataInicialBr = dataInicialDt.ToString("dd/MM/yyyy");
+    string dataFinalBr = dataFinalDt.ToString("dd/MM/yyyy");
 }
 
-<div class="container-fluid">
-    <h1 class="mb-4">Relatórios</h1>
+<div class="container-fluid px-2 px-md-3">
+    <h4 class="mb-2 mb-md-3">Relatórios</h4>
     
-    <div class="row g-4 mb-4">
-        <!-- Resumo Geral -->
-        <div class="col-md-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Resumo Geral</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Total de Empreendimentos</h6>
-                                <h3 class="text-primary">@ViewBag.TotalEmpreendimentos</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Total de Imóveis</h6>
-                                <h3 class="text-info">@ViewBag.TotalImoveis</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Total de Contratos</h6>
-                                <h3 class="text-success">@ViewBag.TotalContratos</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Total de Vendas</h6>
-                                <h3 class="text-success">R$ @ViewBag.TotalVendas.ToString("N2")</h3>
-                            </div>
-                        </div>
+    <!-- Filtros -->
+    <div class="card mb-2 mb-md-3">
+        <div class="card-header bg-primary text-white py-2">
+            <h6 class="mb-0">Filtros</h6>
+        </div>
+        <div class="card-body p-2 p-md-3">
+            <form asp-action="Index" method="get" class="row g-2" id="formFiltros">
+                <div class="col-6 col-md-3">
+                    <label for="dataInicial" class="form-label small mb-1">Data Inicial</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" id="dataInicial" class="form-control" value="@dataInicialBr" placeholder="dd/MM/yyyy" maxlength="10" required />
+                        <input type="date" id="dataInicialDate" class="form-control" value="@dataInicial" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+                        <button type="button" class="btn btn-outline-secondary" onclick="abrirCalendario('dataInicial')">
+                            <i class="bi bi-calendar"></i>
+                        </button>
                     </div>
+                    <input type="hidden" id="dataInicialHidden" name="dataInicial" value="@dataInicial" />
                 </div>
-            </div>
-        </div>
-
-        <!-- Financeiro -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-arrow-down-circle"></i> Entradas</h5>
+                <div class="col-6 col-md-3">
+                    <label for="dataFinal" class="form-label small mb-1">Data Final</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" id="dataFinal" class="form-control" value="@dataFinalBr" placeholder="dd/MM/yyyy" maxlength="10" required />
+                        <input type="date" id="dataFinalDate" class="form-control" value="@dataFinal" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+                        <button type="button" class="btn btn-outline-secondary" onclick="abrirCalendario('dataFinal')">
+                            <i class="bi bi-calendar"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" id="dataFinalHidden" name="dataFinal" value="@dataFinal" />
                 </div>
-                <div class="card-body">
-                    <h2 class="text-success">R$ @ViewBag.TotalEntradas.ToString("N2")</h2>
+                <div class="col-6 col-md-2">
+                    <label for="tipo" class="form-label small mb-1">Tipo</label>
+                    <select id="tipo" name="tipo" class="form-select form-select-sm">
+                        @if (tipo == "Todos" || tipo == "")
+                        {
+                            <option value="" selected>Todos</option>
+                        }
+                        else
+                        {
+                            <option value="">Todos</option>
+                        }
+                        @if (tipo == "Saidas")
+                        {
+                            <option value="Saidas" selected>Saídas</option>
+                        }
+                        else
+                        {
+                            <option value="Saidas">Saídas</option>
+                        }
+                        @if (tipo == "Entradas")
+                        {
+                            <option value="Entradas" selected>Entradas</option>
+                        }
+                        else
+                        {
+                            <option value="Entradas">Entradas</option>
+                        }
+                    </select>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-white">
-                    <h5 class="mb-0"><i class="bi bi-arrow-up-circle"></i> Custos</h5>
+                <div class="col-6 col-md-2">
+                    <label for="status" class="form-label small mb-1">Status</label>
+                    <select id="status" name="status" class="form-select form-select-sm">
+                        @if (status == "Todos" || status == "")
+                        {
+                            <option value="" selected>Todos</option>
+                        }
+                        else
+                        {
+                            <option value="">Todos</option>
+                        }
+                        @if (status == "Pago")
+                        {
+                            <option value="Pago" selected>Pago</option>
+                        }
+                        else
+                        {
+                            <option value="Pago">Pago</option>
+                        }
+                        @if (status == "Pendente")
+                        {
+                            <option value="Pendente" selected>Pendente</option>
+                        }
+                        else
+                        {
+                            <option value="Pendente">Pendente</option>
+                        }
+                        @if (status == "Realizado")
+                        {
+                            <option value="Realizado" selected>Realizado</option>
+                        }
+                        else
+                        {
+                            <option value="Realizado">Realizado</option>
+                        }
+                        @if (status == "Previsto")
+                        {
+                            <option value="Previsto" selected>Previsto</option>
+                        }
+                        else
+                        {
+                            <option value="Previsto">Previsto</option>
+                        }
+                    </select>
                 </div>
-                <div class="card-body">
-                    <h2 class="text-warning">R$ @ViewBag.TotalCustos.ToString("N2")</h2>
+                <div class="col-6 col-md-2 d-flex align-items-end gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                        Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary btn-sm">
+                        Limpar
+                    </a>
                 </div>
-            </div>
-        </div>
-
-        <!-- Saldo -->
-        <div class="col-md-12">
-            <div class="card shadow-sm border-@(ViewBag.Saldo >= 0 ? "success" : "danger")">
-                <div class="card-header bg-@(ViewBag.Saldo >= 0 ? "success" : "danger") text-white">
-                    <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Saldo Total</h5>
-                </div>
-                <div class="card-body">
-                    <h1 class="text-@(ViewBag.Saldo >= 0 ? "success" : "danger")">R$ @ViewBag.Saldo.ToString("N2")</h1>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
+
+    <!-- Card com Valor Total -->
+    <div class="card mb-2 mb-md-3">
+        <div class="card-header bg-@(tipo == "Saidas" ? "warning" : tipo == "Entradas" ? "success" : "info") text-white py-2">
+            <h6 class="mb-0">
+                Valor Total
+                @if (tipo == "Saidas")
+                {
+                    <span class="badge bg-light text-dark ms-1">Saídas</span>
+                }
+                else if (tipo == "Entradas")
+                {
+                    <span class="badge bg-light text-dark ms-1">Entradas</span>
+                }
+                else
+                {
+                    <span class="badge bg-light text-dark ms-1">Todos</span>
+                }
+            </h6>
+        </div>
+        <div class="card-body p-2 p-md-3">
+            <h5 class="text-@(tipo == "Saidas" ? "warning" : tipo == "Entradas" ? "success" : "info") mb-1">
+                R$ @valorTotal.ToString("N2")
+            </h5>
+            <small class="text-muted">
+                @dataInicialBr até @dataFinalBr
+            </small>
+        </div>
+    </div>
+
+    <!-- Grid com Dados -->
+    @if (itensRelatorio.Any())
+    {
+        <div class="card">
+            <div class="card-header bg-secondary text-white py-2">
+                <h6 class="mb-0">Dados do Relatório</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="small">Data</th>
+                                <th class="small">Descrição</th>
+                                <th class="small d-none d-md-table-cell">Fornecedor/Imóvel</th>
+                                <th class="small text-center">Valor</th>
+                                <th class="small d-none d-md-table-cell text-center">Tipo</th>
+                                <th class="small text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in itensRelatorio)
+                            {
+                                <tr>
+                                    <td class="small">@item.Data.ToString("dd/MM/yyyy")</td>
+                                    <td class="small">
+                                        <div class="d-md-none">
+                                            @if (item.Tipo == "Saida")
+                                            {
+                                                <span class="badge bg-warning text-dark me-1">S</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success me-1">E</span>
+                                            }
+                                        </div>
+                                        <span class="text-truncate d-inline-block" style="max-width: 150px;" title="@item.Descricao">@item.Descricao</span>
+                                        <div class="d-md-none small text-muted">
+                                            @(string.IsNullOrEmpty(item.FornecedorOuImovel) ? "-" : item.FornecedorOuImovel)
+                                        </div>
+                                    </td>
+                                    <td class="small d-none d-md-table-cell">@(string.IsNullOrEmpty(item.FornecedorOuImovel) ? "-" : item.FornecedorOuImovel)</td>
+                                    <td class="small text-center">
+                                        <strong class="text-@(item.Tipo == "Saida" ? "warning" : "success")">
+                                            R$ @item.ValorTotal.ToString("N2")
+                                        </strong>
+                                    </td>
+                                    <td class="small d-none d-md-table-cell text-center">
+                                        @if (item.Tipo == "Saida")
+                                        {
+                                            <span class="badge bg-warning text-dark">Saída</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Entrada</span>
+                                        }
+                                    </td>
+                                    <td class="small text-center">
+                                        @if (item.Status == "Pago" || item.Status == "Realizado")
+                                        {
+                                            <span class="badge bg-success">@item.Status</span>
+                                        }
+                                        else if (item.Status == "Pendente" || item.Status == "Previsto")
+                                        {
+                                            <span class="badge bg-warning text-dark">@item.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.Status</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-info">
+                            <tr>
+                                <th colspan="3" class="small text-end d-none d-md-table-cell">Total:</th>
+                                <th colspan="2" class="small text-end d-md-none">Total:</th>
+                                <th class="small text-center">
+                                    <strong>R$ @valorTotal.ToString("N2")</strong>
+                                </th>
+                                <th class="d-none d-md-table-cell"></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info py-2" role="alert">
+            <small>Nenhum registro encontrado para os filtros selecionados.</small>
+        </div>
+    }
 </div>
 
+<script>
+    function abrirCalendario(tipo) {
+        var inputTexto = $('#' + tipo);
+        var inputDate = $('#' + tipo + 'Date');
+        
+        // Se já tiver uma data no formato dd/MM/yyyy, converter para yyyy-MM-dd
+        var dataTexto = inputTexto.val();
+        if (dataTexto) {
+            var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            var match = dataTexto.match(regex);
+            if (match) {
+                var dia = match[1];
+                var mes = match[2];
+                var ano = match[3];
+                inputDate.val(ano + '-' + mes + '-' + dia);
+            }
+        } else {
+            // Se não tiver data, usar hoje
+            var hoje = new Date();
+            var ano = hoje.getFullYear();
+            var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            var dia = String(hoje.getDate()).padStart(2, '0');
+            inputDate.val(ano + '-' + mes + '-' + dia);
+        }
+        
+        // Quando a data for selecionada, atualizar o campo de texto
+        inputDate.off('change').on('change', function() {
+            var dataSelecionada = $(this).val();
+            if (dataSelecionada) {
+                var partes = dataSelecionada.split('-');
+                if (partes.length === 3) {
+                    var dia = partes[2];
+                    var mes = partes[1];
+                    var ano = partes[0];
+                    inputTexto.val(dia + '/' + mes + '/' + ano);
+                    // Atualizar também o campo hidden
+                    var hiddenId = tipo === 'dataInicial' ? 'dataInicialHidden' : 'dataFinalHidden';
+                    $('#' + hiddenId).val(dataSelecionada);
+                }
+            }
+            // Restaurar pointer-events após seleção
+            $(this).css('pointer-events', 'none');
+        });
+        
+        // Habilitar pointer-events temporariamente para abrir o calendário
+        inputDate.css('pointer-events', 'auto');
+        inputDate.css('position', 'fixed');
+        inputDate.css('left', '50%');
+        inputDate.css('top', '50%');
+        inputDate.css('transform', 'translate(-50%, -50%)');
+        inputDate.css('z-index', '9999');
+        
+        // Abrir o calendário nativo (se suportado)
+        setTimeout(function() {
+            if (inputDate[0] && typeof inputDate[0].showPicker === 'function') {
+                inputDate[0].showPicker().catch(function() {
+                    // Se showPicker falhar, usar fallback
+                    inputDate[0].focus();
+                    inputDate[0].click();
+                });
+            } else {
+                // Fallback: focar no input date (alguns navegadores abrem o calendário ao focar)
+                inputDate[0].focus();
+                inputDate[0].click();
+            }
+            
+            // Restaurar posição após um tempo
+            setTimeout(function() {
+                inputDate.css('position', 'absolute');
+                inputDate.css('left', '-9999px');
+                inputDate.css('top', 'auto');
+                inputDate.css('transform', 'none');
+                inputDate.css('z-index', 'auto');
+                inputDate.css('pointer-events', 'none');
+            }, 100);
+        }, 10);
+    }
+
+    $(document).ready(function() {
+        // Máscara de data para os campos de data
+        $('#dataInicial, #dataFinal').on('input', function() {
+            var value = $(this).val().replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 2) {
+                    value = value;
+                } else if (value.length <= 4) {
+                    value = value.substring(0, 2) + '/' + value.substring(2);
+                } else {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+                }
+                $(this).val(value);
+            }
+        });
+
+        // Converter dd/MM/yyyy para yyyy-MM-dd antes de enviar
+        $('#formFiltros').on('submit', function(e) {
+            var dataInicialInput = $('#dataInicial').val();
+            var dataFinalInput = $('#dataFinal').val();
+            var erro = false;
+            
+            if (dataInicialInput) {
+                var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                var match = dataInicialInput.match(regex);
+                if (match) {
+                    var dia = parseInt(match[1], 10);
+                    var mes = parseInt(match[2], 10);
+                    var ano = parseInt(match[3], 10);
+                    
+                    if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                        var data = new Date(ano, mes - 1, dia);
+                        if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                            var dataFormatada = ano + '-' + 
+                                (mes < 10 ? '0' + mes : mes) + '-' + 
+                                (dia < 10 ? '0' + dia : dia);
+                            $('#dataInicialHidden').val(dataFormatada);
+                        } else {
+                            erro = true;
+                            alert('Data inicial inválida. Por favor, verifique o dia, mês e ano.');
+                        }
+                    } else {
+                        erro = true;
+                        alert('Data inicial inválida. Por favor, verifique o dia, mês e ano.');
+                    }
+                } else {
+                    erro = true;
+                    alert('Formato de data inicial inválido. Use o formato dd/MM/yyyy.');
+                }
+            } else {
+                erro = true;
+                alert('Por favor, informe a data inicial.');
+            }
+
+            if (!erro && dataFinalInput) {
+                var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                var match = dataFinalInput.match(regex);
+                if (match) {
+                    var dia = parseInt(match[1], 10);
+                    var mes = parseInt(match[2], 10);
+                    var ano = parseInt(match[3], 10);
+                    
+                    if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                        var data = new Date(ano, mes - 1, dia);
+                        if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                            var dataFormatada = ano + '-' + 
+                                (mes < 10 ? '0' + mes : mes) + '-' + 
+                                (dia < 10 ? '0' + dia : dia);
+                            $('#dataFinalHidden').val(dataFormatada);
+                        } else {
+                            erro = true;
+                            alert('Data final inválida. Por favor, verifique o dia, mês e ano.');
+                        }
+                    } else {
+                        erro = true;
+                        alert('Data final inválida. Por favor, verifique o dia, mês e ano.');
+                    }
+                } else {
+                    erro = true;
+                    alert('Formato de data final inválido. Use o formato dd/MM/yyyy.');
+                }
+            } else if (!erro && !dataFinalInput) {
+                erro = true;
+                alert('Por favor, informe a data final.');
+            }
+
+            if (erro) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Garantir que os campos hidden tenham os valores corretos antes de enviar
+            // Os valores já foram atualizados acima, então o formulário pode ser enviado normalmente
+        });
+    });
+</script>
+
+<style>
+    @@media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .card {
+            margin-bottom: 0.5rem;
+        }
+        .table {
+            font-size: 0.85rem;
+        }
+    }
+</style>

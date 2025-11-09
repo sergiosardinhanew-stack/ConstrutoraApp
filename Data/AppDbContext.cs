@@ -11,6 +11,8 @@ namespace ConstrutoraApp.Data
         public DbSet<Imovel> Imoveis { get; set; }
         public DbSet<Custo> Custos { get; set; }
         public DbSet<Entrada> Entradas { get; set; }
+        public DbSet<Parcelamento> Parcelamentos { get; set; }
+        public DbSet<Pagamento> Pagamentos { get; set; }
         public DbSet<Contrato> Contratos { get; set; }
         public DbSet<Movimentacao> Movimentacoes { get; set; }
 
@@ -43,6 +45,18 @@ namespace ConstrutoraApp.Data
                 .WithMany()
                 .HasForeignKey(e => e.ImovelId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Entrada>()
+                .HasMany(e => e.Parcelamentos)
+                .WithOne(p => p.Entrada)
+                .HasForeignKey(p => p.EntradaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Parcelamento>()
+                .HasMany(p => p.Pagamentos)
+                .WithOne(pg => pg.Parcelamento)
+                .HasForeignKey(pg => pg.ParcelamentoId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

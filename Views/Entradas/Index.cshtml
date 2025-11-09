@@ -7,10 +7,28 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1><i class="bi bi-arrow-down-circle"></i> Entradas</h1>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Nova Entrada
-        </a>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nova Entrada
+            </a>
+        </div>
     </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     @if (TempData["Warning"] != null)
     {
@@ -26,11 +44,9 @@
             <table class="table table-striped table-hover">
                 <thead class="table-dark">
                     <tr>
-                        <th>@Html.DisplayNameFor(model => model.Descricao)</th>
-                        <th>@Html.DisplayNameFor(model => model.Tipo)</th>
-                        <th>@Html.DisplayNameFor(model => model.Empreendimento)</th>
-                        <th>@Html.DisplayNameFor(model => model.Valor)</th>
-                        <th>@Html.DisplayNameFor(model => model.Data)</th>
+                        <th>Empreendimento</th>
+                        <th>Imóvel</th>
+                        <th>Valor Total</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -38,20 +54,25 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(modelItem => item.Descricao)</td>
-                            <td>@Html.DisplayFor(modelItem => item.Tipo)</td>
                             <td>@Html.DisplayFor(modelItem => item.Empreendimento!.Nome)</td>
-                            <td>R$ @item.Valor.ToString("N2")</td>
-                            <td>@Html.DisplayFor(modelItem => item.Data)</td>
+                            <td>@(item.Imovel?.Numero ?? "-")</td>
+                            <td>
+                                @if (item.Parcelamentos != null && item.Parcelamentos.Any())
+                                {
+                                    var valorTotal = item.Parcelamentos.Sum(p => p.ValorTotal);
+                                    <strong class="text-success">R$ @valorTotal.ToString("N2")</strong>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Excluir">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
@@ -70,4 +91,316 @@
         </div>
     }
 </div>
+
+<!-- Modal de Edição -->
+<div class="modal fade" id="modalEditarEntrada" tabindex="-1" aria-labelledby="modalEditarEntradaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarEntradaLabel">
+                    <i class="bi bi-pencil"></i> Editar Entrada
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                <!-- Formulário da Entrada -->
+                <div id="formEntrada">
+                    <input type="hidden" id="entradaId" />
+                    
+                    <div class="mb-3">
+                        <label for="empreendimentoId" class="form-label">
+                            <strong>Empreendimento</strong> <span class="text-danger">*</span>
+                        </label>
+                        <select id="empreendimentoId" class="form-select" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imovelId" class="form-label">
+                            <strong>Imóvel</strong> <span class="text-muted">(Opcional)</span>
+                        </label>
+                        <select id="imovelId" class="form-select">
+                            <option value="">Selecione um imóvel (opcional)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">
+                            <strong>Descrição</strong> <span class="text-muted">(Opcional)</span>
+                        </label>
+                        <textarea id="descricao" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <!-- Seção de Pagamentos (inicialmente oculta) -->
+                <div id="secaoPagamentos" style="display: none;">
+                    <hr />
+                    <h5 class="mb-3"><i class="bi bi-credit-card"></i> Pagamentos</h5>
+                    <div id="listaPagamentos" class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Parcela</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Data Vencimento</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyPagamentos">
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary mt-2" onclick="adicionarNovoPagamento()">
+                        <i class="bi bi-plus-circle"></i> Adicionar Pagamento
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </button>
+                <button type="button" class="btn btn-info" id="btnPagamentos" onclick="mostrarPagamentos()" style="display: none;">
+                    <i class="bi bi-credit-card"></i> Pagamentos
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSalvar" onclick="salvarEdicao()">
+                    <i class="bi bi-check-circle"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let entradaAtual = null;
+        let pagamentosEditados = [];
+
+        function abrirModalEditar(id) {
+            // Limpar dados anteriores
+            entradaAtual = null;
+            pagamentosEditados = [];
+            $('#secaoPagamentos').hide();
+            $('#btnPagamentos').hide();
+            $('#tbodyPagamentos').empty();
+
+            // Carregar dados da entrada
+            $.ajax({
+                url: '@Url.Action("GetForEdit", "Entradas")',
+                type: 'GET',
+                data: { id: id },
+                success: function(data) {
+                    entradaAtual = data;
+                    
+                    // Preencher formulário da entrada
+                    $('#entradaId').val(data.entrada.id);
+                    $('#descricao').val(data.entrada.descricao || '');
+
+                    // Preencher select de empreendimentos
+                    var empreendimentoSelect = $('#empreendimentoId');
+                    empreendimentoSelect.empty();
+                    empreendimentoSelect.append('<option value="">Selecione...</option>');
+                    $.each(data.empreendimentos, function(index, emp) {
+                        var selected = emp.id == data.entrada.empreendimentoId ? 'selected' : '';
+                        empreendimentoSelect.append('<option value="' + emp.id + '" ' + selected + '>' + emp.nome + '</option>');
+                    });
+
+                    // Preencher select de imóveis
+                    var imovelSelect = $('#imovelId');
+                    imovelSelect.empty();
+                    imovelSelect.append('<option value="">Selecione um imóvel (opcional)</option>');
+                    if (data.imoveis && data.imoveis.length > 0) {
+                        $.each(data.imoveis, function(index, imovel) {
+                            var selected = imovel.id == data.entrada.imovelId ? 'selected' : '';
+                            imovelSelect.append('<option value="' + imovel.id + '" ' + selected + '>' + imovel.numero + '</option>');
+                        });
+                        imovelSelect.prop('disabled', false);
+                    } else {
+                        imovelSelect.prop('disabled', true);
+                    }
+
+                    // Carregar pagamentos
+                    pagamentosEditados = data.pagamentos.map(function(p) {
+                        return {
+                            id: p.id,
+                            parcelamentoId: p.parcelamentoId,
+                            numeroParcela: p.numeroParcela,
+                            valorParcela: p.valorParcela,
+                            status: p.status,
+                            dataVencimento: p.dataVencimento
+                        };
+                    });
+
+                    // Mostrar botão Pagamentos se houver pagamentos
+                    if (pagamentosEditados.length > 0) {
+                        $('#btnPagamentos').show();
+                    }
+
+                    // Carregar imóveis quando o empreendimento mudar
+                    $('#empreendimentoId').off('change').on('change', function() {
+                        var empreendimentoId = $(this).val();
+                        if (empreendimentoId) {
+                            carregarImoveisModal(empreendimentoId);
+                        } else {
+                            $('#imovelId').empty().append('<option value="">Selecione um imóvel (opcional)</option>').prop('disabled', true);
+                        }
+                    });
+
+                    // Abrir modal
+                    var modal = new bootstrap.Modal(document.getElementById('modalEditarEntrada'));
+                    modal.show();
+                },
+                error: function() {
+                    alert('Erro ao carregar dados da entrada.');
+                }
+            });
+        }
+
+        function carregarImoveisModal(empreendimentoId) {
+            $.ajax({
+                url: '@Url.Action("GetImoveisByEmpreendimento", "Entradas")',
+                type: 'GET',
+                data: { empreendimentoId: empreendimentoId },
+                success: function(data) {
+                    var imovelSelect = $('#imovelId');
+                    imovelSelect.empty();
+                    imovelSelect.append('<option value="">Selecione um imóvel (opcional)</option>');
+                    if (data && data.length > 0) {
+                        $.each(data, function(index, imovel) {
+                            imovelSelect.append('<option value="' + imovel.id + '">' + imovel.numero + ' - ' + imovel.tipo + ' (' + imovel.status + ')</option>');
+                        });
+                        imovelSelect.prop('disabled', false);
+                    } else {
+                        imovelSelect.append('<option value="">Nenhum imóvel encontrado</option>');
+                        imovelSelect.prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    $('#imovelId').empty().append('<option value="">Erro ao carregar imóveis</option>').prop('disabled', true);
+                }
+            });
+        }
+
+        function mostrarPagamentos() {
+            $('#secaoPagamentos').toggle();
+            renderizarPagamentos();
+        }
+
+        function renderizarPagamentos() {
+            var tbody = $('#tbodyPagamentos');
+            tbody.empty();
+
+            if (pagamentosEditados.length === 0) {
+                tbody.append('<tr><td colspan="5" class="text-center text-muted">Nenhum pagamento cadastrado</td></tr>');
+                return;
+            }
+
+            $.each(pagamentosEditados, function(index, pagamento) {
+                var row = $('<tr>');
+                row.append('<td>' + pagamento.numeroParcela + '</td>');
+                row.append('<td><input type="number" class="form-control form-control-sm" step="0.01" value="' + pagamento.valorParcela + '" onchange="atualizarPagamento(' + index + ', \'valorParcela\', this.value)" /></td>');
+                row.append('<td><select class="form-select form-select-sm" onchange="atualizarPagamento(' + index + ', \'status\', this.value)">' +
+                    '<option value="Pago"' + (pagamento.status === 'Pago' ? ' selected' : '') + '>Pago</option>' +
+                    '<option value="Pendente"' + (pagamento.status === 'Pendente' ? ' selected' : '') + '>Pendente</option>' +
+                    '</select></td>');
+                row.append('<td><input type="text" class="form-control form-control-sm" placeholder="dd/MM/yyyy" value="' + pagamento.dataVencimento + '" maxlength="10" onchange="atualizarPagamento(' + index + ', \'dataVencimento\', this.value)" /></td>');
+                row.append('<td><button type="button" class="btn btn-sm btn-danger" onclick="removerPagamento(' + index + ')"><i class="bi bi-trash"></i></button></td>');
+                tbody.append(row);
+            });
+        }
+
+        function atualizarPagamento(index, campo, valor) {
+            if (pagamentosEditados[index]) {
+                if (campo === 'numeroParcela') {
+                    pagamentosEditados[index][campo] = valor ? parseInt(valor) : null;
+                } else if (campo === 'valorParcela') {
+                    pagamentosEditados[index][campo] = parseFloat(valor) || 0;
+                } else {
+                    pagamentosEditados[index][campo] = valor;
+                }
+            }
+        }
+
+        function adicionarNovoPagamento() {
+            var hoje = new Date();
+            var dataFormatada = String(hoje.getDate()).padStart(2, '0') + '/' + 
+                               String(hoje.getMonth() + 1).padStart(2, '0') + '/' + 
+                               hoje.getFullYear();
+            
+            pagamentosEditados.push({
+                id: 0,
+                parcelamentoId: 0,
+                numeroParcela: pagamentosEditados.length + 1,
+                valorParcela: 0,
+                status: 'Pendente',
+                dataVencimento: dataFormatada
+            });
+            renderizarPagamentos();
+        }
+
+        function removerPagamento(index) {
+            if (confirm('Tem certeza que deseja remover este pagamento?')) {
+                pagamentosEditados.splice(index, 1);
+                renderizarPagamentos();
+            }
+        }
+
+        function salvarEdicao() {
+            var entrada = {
+                id: parseInt($('#entradaId').val()),
+                empreendimentoId: parseInt($('#empreendimentoId').val()),
+                imovelId: $('#imovelId').val() ? parseInt($('#imovelId').val()) : null,
+                descricao: $('#descricao').val()
+            };
+
+            if (!entrada.empreendimentoId) {
+                alert('Por favor, selecione um empreendimento.');
+                return;
+            }
+
+            var model = {
+                entrada: entrada,
+                pagamentos: pagamentosEditados
+            };
+
+            $.ajax({
+                url: '@Url.Action("UpdateWithPagamentos", "Entradas")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() || $('input[name="__RequestVerificationToken"]').first().val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Erro ao salvar as alterações.');
+                }
+            });
+        }
+
+        // Máscara de data
+        $(document).on('input', 'input[placeholder="dd/MM/yyyy"]', function() {
+            var value = $(this).val().replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 2) {
+                    value = value;
+                } else if (value.length <= 4) {
+                    value = value.substring(0, 2) + '/' + value.substring(2);
+                } else {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+                }
+                $(this).val(value);
+            }
+        });
+    </script>
+}
 

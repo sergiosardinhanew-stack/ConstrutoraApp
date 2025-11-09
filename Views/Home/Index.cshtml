@@ -2,121 +2,117 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="container-fluid">
-    <h1 class="mb-4">Dashboard</h1>
+<div class="container-fluid px-2 px-md-3">
+    <h4 class="mb-2 mb-md-3">Dashboard</h4>
     
-    <div class="row g-4 mb-4">
-        <!-- Card: Total de Empreendimentos -->
-        <div class="col-md-4">
-            <div class="card border-info shadow-sm">
-                <div class="card-body">
+    <div class="row g-2 g-md-3 mb-3">
+        <!-- Card: Entradas do Dia -->
+        <div class="col-6 col-md-3">
+            <div class="card border-success shadow-sm">
+                <div class="card-body p-2 p-md-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-subtitle mb-2 text-muted">Total de Empreendimentos</h6>
-                            <h2 class="card-title mb-0 text-info">@ViewBag.TotalEmpreendimentos</h2>
+                            <h6 class="card-subtitle mb-1 small text-muted">Entradas do Dia</h6>
+                            <h5 class="card-title mb-0 text-success">R$ @ViewBag.EntradasDia.ToString("N2")</h5>
                         </div>
-                        <div class="text-info" style="font-size: 3rem;">
-                            <i class="bi bi-building"></i>
+                        <div class="text-success" style="font-size: 2rem;">
+                            <i class="bi bi-arrow-down-circle"></i>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-info bg-opacity-10">
-                    <a asp-controller="Empreendimentos" asp-action="Index" class="text-decoration-none text-info">
-                        Ver todos <i class="bi bi-arrow-right"></i>
-                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Card: Saldo -->
-        <div class="col-md-4">
-            <div class="card border-@(ViewBag.Saldo >= 0 ? "success" : "danger") shadow-sm">
-                <div class="card-body">
+        <!-- Card: Saídas do Dia -->
+        <div class="col-6 col-md-3">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body p-2 p-md-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-subtitle mb-2 text-muted">Saldo Total</h6>
-                            <h2 class="card-title mb-0 text-@(ViewBag.Saldo >= 0 ? "success" : "danger")">
-                                R$ @ViewBag.Saldo.ToString("N2")
-                            </h2>
-                            <small class="text-muted">
-                                Entradas: R$ @ViewBag.TotalEntradas.ToString("N2") | 
-                                Custos: R$ @ViewBag.TotalCustos.ToString("N2")
-                            </small>
+                            <h6 class="card-subtitle mb-1 small text-muted">Saídas do Dia</h6>
+                            <h5 class="card-title mb-0 text-warning">R$ @ViewBag.SaidasDia.ToString("N2")</h5>
                         </div>
-                        <div class="text-@(ViewBag.Saldo >= 0 ? "success" : "danger")" style="font-size: 3rem;">
-                            <i class="bi bi-@(ViewBag.Saldo >= 0 ? "arrow-up-circle" : "arrow-down-circle")"></i>
+                        <div class="text-warning" style="font-size: 2rem;">
+                            <i class="bi bi-arrow-up-circle"></i>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-@(ViewBag.Saldo >= 0 ? "success" : "danger") bg-opacity-10">
-                    <a asp-controller="Relatorios" asp-action="Index" class="text-decoration-none text-@(ViewBag.Saldo >= 0 ? "success" : "danger")">
-                        Ver relatórios <i class="bi bi-arrow-right"></i>
-                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Card: Total de Vendas -->
-        <div class="col-md-4">
-            <div class="card border-info shadow-sm">
-                <div class="card-body">
+        <!-- Card: Entradas do Mês -->
+        <div class="col-6 col-md-3">
+            <div class="card border-success shadow-sm">
+                <div class="card-body p-2 p-md-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-subtitle mb-2 text-muted">Total de Vendas</h6>
-                            <h2 class="card-title mb-0 text-info">R$ @ViewBag.TotalVendas.ToString("N2")</h2>
+                            <h6 class="card-subtitle mb-1 small text-muted">Entradas do Mês</h6>
+                            <h5 class="card-title mb-0 text-success">R$ @ViewBag.EntradasMes.ToString("N2")</h5>
                         </div>
-                        <div class="text-info" style="font-size: 3rem;">
-                            <i class="bi bi-cash-coin"></i>
+                        <div class="text-success" style="font-size: 2rem;">
+                            <i class="bi bi-arrow-down-circle"></i>
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-info bg-opacity-10">
-                    <a asp-controller="Contratos" asp-action="Index" class="text-decoration-none text-info">
-                        Ver contratos <i class="bi bi-arrow-right"></i>
-                    </a>
+            </div>
+        </div>
+
+        <!-- Card: Saídas do Mês -->
+        <div class="col-6 col-md-3">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body p-2 p-md-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-1 small text-muted">Saídas do Mês</h6>
+                            <h5 class="card-title mb-0 text-warning">R$ @ViewBag.SaidasMes.ToString("N2")</h5>
+                        </div>
+                        <div class="text-warning" style="font-size: 2rem;">
+                            <i class="bi bi-arrow-up-circle"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Cards Secundários -->
-    <div class="row g-4">
+    <!-- Cards de Menu -->
+    <div class="row g-2 g-md-3">
         <!-- Card: Imóveis -->
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card border-secondary shadow-sm">
-                <div class="card-body text-center">
-                    <i class="bi bi-house-door text-secondary" style="font-size: 2.5rem;"></i>
-                    <h5 class="card-title mt-3">Imóveis</h5>
-                    <p class="card-text text-muted">Gerenciar imóveis</p>
-                    <a asp-controller="Imoveis" asp-action="Index" class="btn btn-outline-secondary">
+                <div class="card-body text-center p-2 p-md-3">
+                    <i class="bi bi-house-door text-secondary" style="font-size: 2rem;"></i>
+                    <h6 class="card-title mt-2 mb-1">Imóveis</h6>
+                    <p class="card-text text-muted small mb-2">Gerenciar imóveis</p>
+                    <a asp-controller="Imoveis" asp-action="Index" class="btn btn-sm btn-outline-secondary">
                         Acessar <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Card: Custos -->
-        <div class="col-md-3">
+        <!-- Card: Saídas -->
+        <div class="col-6 col-md-3">
             <div class="card border-warning shadow-sm">
-                <div class="card-body text-center">
-                    <i class="bi bi-currency-dollar text-warning" style="font-size: 2.5rem;"></i>
-                    <h5 class="card-title mt-3">Custos</h5>
-                    <p class="card-text text-muted">Gerenciar despesas</p>
-                    <a asp-controller="Custos" asp-action="Index" class="btn btn-outline-warning">
+                <div class="card-body text-center p-2 p-md-3">
+                    <i class="bi bi-arrow-up-circle text-warning" style="font-size: 2rem;"></i>
+                    <h6 class="card-title mt-2 mb-1">Saídas</h6>
+                    <p class="card-text text-muted small mb-2">Gerenciar despesas</p>
+                    <a asp-controller="Custos" asp-action="Index" class="btn btn-sm btn-outline-warning">
                         Acessar <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Card: Entradas -->
-        <div class="col-md-3">
-            <div class="card border-success shadow-sm">
-                <div class="card-body text-center">
-                    <i class="bi bi-arrow-down-circle text-success" style="font-size: 2.5rem;"></i>
-                    <h5 class="card-title mt-3">Entradas</h5>
-                    <p class="card-text text-muted">Gerenciar receitas</p>
-                    <a asp-controller="Entradas" asp-action="Index" class="btn btn-outline-success">
+        <!-- Card: Criar Parcelas -->
+        <div class="col-6 col-md-3">
+            <div class="card border-info shadow-sm">
+                <div class="card-body text-center p-2 p-md-3">
+                    <i class="bi bi-calendar-plus text-info" style="font-size: 2rem;"></i>
+                    <h6 class="card-title mt-2 mb-1">Criar Parcelas</h6>
+                    <p class="card-text text-muted small mb-2">Criar parcelamentos</p>
+                    <a asp-controller="Entradas" asp-action="Index" class="btn btn-sm btn-outline-info">
                         Acessar <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
@@ -124,13 +120,13 @@
         </div>
 
         <!-- Card: Relatórios -->
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card border-dark shadow-sm">
-                <div class="card-body text-center">
-                    <i class="bi bi-graph-up text-dark" style="font-size: 2.5rem;"></i>
-                    <h5 class="card-title mt-3">Relatórios</h5>
-                    <p class="card-text text-muted">Análises e relatórios</p>
-                    <a asp-controller="Relatorios" asp-action="Index" class="btn btn-outline-dark">
+                <div class="card-body text-center p-2 p-md-3">
+                    <i class="bi bi-graph-up text-dark" style="font-size: 2rem;"></i>
+                    <h6 class="card-title mt-2 mb-1">Relatórios</h6>
+                    <p class="card-text text-muted small mb-2">Análises e relatórios</p>
+                    <a asp-controller="Relatorios" asp-action="Index" class="btn btn-sm btn-outline-dark">
                         Acessar <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
@@ -138,3 +134,15 @@
         </div>
     </div>
 </div>
+
+<style>
+    @@media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .card {
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>

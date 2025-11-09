@@ -1,0 +1,756 @@
+@model IEnumerable<ConstrutoraApp.Models.Pagamento>
+
+@{
+    ViewData["Title"] = "Pagamentos";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-credit-card"></i> Pagamentos</h1>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary" onclick="abrirModalNovoPagamento()">
+                <i class="bi bi-plus-circle"></i> Novo Pagamento
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle"></i> @TempData["Info"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="empreendimentoId" class="form-label">Filtrar por Empreendimento</label>
+                    <select id="empreendimentoId" name="empreendimentoId" class="form-select" onchange="carregarImoveisFiltro()">
+                        <option value="">Todos os Empreendimentos</option>
+                        @foreach (var emp in ViewBag.Empreendimentos as SelectList)
+                        {
+                            @if (ViewBag.EmpreendimentoId != null && emp.Value == ViewBag.EmpreendimentoId.ToString())
+                            {
+                                <option value="@emp.Value" selected>@emp.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@emp.Value">@emp.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="imovelId" class="form-label">Filtrar por Imóvel</label>
+                    <select id="imovelId" name="imovelId" class="form-select">
+                        <option value="">Todos os Imóveis</option>
+                        @foreach (var imovel in ViewBag.Imoveis as SelectList)
+                        {
+                            @if (ViewBag.ImovelId != null && imovel.Value == ViewBag.ImovelId.ToString())
+                            {
+                                <option value="@imovel.Value" selected>@imovel.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@imovel.Value">@imovel.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Entrada</th>
+                        <th>Empreendimento</th>
+                        <th>Imóvel</th>
+                        <th>Tipo</th>
+                        <th>Parcela</th>
+                        <th>Valor Pago</th>
+                        <th>Data Vencimento</th>
+                        <th>Data Pagamento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>#@(item.Parcelamento?.Entrada?.Id ?? 0)</td>
+                            <td>@(item.Parcelamento?.Entrada?.Empreendimento?.Nome ?? "-")</td>
+                            <td>@(item.Parcelamento?.Entrada?.Imovel?.Numero ?? "-")</td>
+                            <td>@(item.Parcelamento?.TipoPagamento ?? "-")</td>
+                            <td>
+                                @if (item.Parcelamento != null && item.Parcelamento.NumeroParcelas > 1)
+                                {
+                                    <span class="badge bg-info">@item.NumeroParcela/@item.Parcelamento.NumeroParcelas</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.ValorParcela > 0)
+                                {
+                                    <strong class="text-success">R$ @item.ValorParcela.ToString("N2")</strong>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">R$ 0,00</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="text-muted">@item.DataVencimento.ToString("dd/MM/yyyy")</span>
+                            </td>
+                                <td>
+                                    @if (item.DataPagamento.HasValue)
+                                    {
+                                        <span class="text-success">@item.DataPagamento.Value.ToString("dd/MM/yyyy")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja cancelar este pagamento? O registro será mantido como pendente.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x-circle"></i> Excluir
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> Nenhum pagamento pago encontrado.
+        </div>
+    }
+</div>
+
+<!-- Modal Novo Pagamento -->
+<div class="modal fade" id="modalNovoPagamento" tabindex="-1" aria-labelledby="modalNovoPagamentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNovoPagamentoLabel">
+                    <i class="bi bi-plus-circle"></i> Novo Pagamento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="filtroEmpreendimento" class="form-label">
+                            <strong>Empreendimento</strong>
+                        </label>
+                        <select id="filtroEmpreendimento" class="form-select" onchange="carregarImoveisModal()">
+                            <option value="">Selecione...</option>
+                            @foreach (var emp in ViewBag.Empreendimentos as SelectList)
+                            {
+                                <option value="@emp.Value">@emp.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filtroImovel" class="form-label">
+                            <strong>Imóvel</strong>
+                        </label>
+                        <select id="filtroImovel" class="form-select" onchange="carregarPagamentosPendentes()">
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pagamentoPendente" class="form-label">
+                        <strong>Selecione o Pagamento Pendente</strong> <span class="text-danger">*</span>
+                    </label>
+                    <select id="pagamentoPendente" class="form-select" required onchange="preencherDadosPagamento()">
+                        <option value="">Primeiro selecione Empreendimento e Imóvel</option>
+                    </select>
+                </div>
+
+                <div id="infoPagamentoSelecionado" class="alert alert-info" style="display: none;">
+                    <i class="bi bi-info-circle"></i> <strong>Informações do Pagamento:</strong>
+                    <div id="detalhesPagamento" class="mt-2"></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="valorPago" class="form-label">
+                            <strong>Valor Pago</strong> <span class="text-danger">*</span>
+                        </label>
+                        <input id="valorPago" class="form-control" type="number" step="0.01" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="dataPagamentoNovo" class="form-label">
+                            <strong>Data de Pagamento</strong> <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input id="dataPagamentoNovo" class="form-control" type="text" placeholder="dd/MM/yyyy" maxlength="10" required />
+                            <input id="dataPagamentoNovoHidden" type="date" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="abrirCalendarioNovoPagamento()">
+                                <i class="bi bi-calendar"></i>
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">Formato: dd/MM/yyyy</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="salvarNovoPagamento()">
+                    <i class="bi bi-check-circle"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Edição -->
+<div class="modal fade" id="modalEditarPagamento" tabindex="-1" aria-labelledby="modalEditarPagamentoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarPagamentoLabel">
+                    <i class="bi bi-pencil"></i> Editar Pagamento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="pagamentoId" />
+                
+                <div class="mb-3">
+                    <label for="statusPagamento" class="form-label">
+                        <strong>Status</strong> <span class="text-danger">*</span>
+                    </label>
+                    <select id="statusPagamento" class="form-select" required>
+                        <option value="">Selecione...</option>
+                        <option value="Pago">Pago</option>
+                        <option value="Pendente">Pendente</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="dataPagamento" class="form-label">
+                        <strong>Data de Pagamento</strong> <span class="text-muted">(Opcional)</span>
+                    </label>
+                    <input id="dataPagamento" class="form-control" type="text" placeholder="dd/MM/yyyy" maxlength="10" />
+                    <small class="form-text text-muted">Preencha quando o pagamento for realizado</small>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>Informações do Pagamento:</strong>
+                    <div id="infoPagamento" class="mt-2"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="salvarEdicaoPagamento()">
+                    <i class="bi bi-check-circle"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let pagamentoAtual = null;
+        let pagamentoSelecionado = null;
+
+        function carregarImoveisFiltro() {
+            var empreendimentoId = $('#empreendimentoId').val();
+            var imovelSelect = $('#imovelId');
+            
+            imovelSelect.empty();
+            imovelSelect.append('<option value="">Todos os Imóveis</option>');
+            
+            if (empreendimentoId) {
+                $.ajax({
+                    url: '@Url.Action("GetImoveisByEmpreendimento", "Entradas")',
+                    type: 'GET',
+                    data: { empreendimentoId: empreendimentoId },
+                    success: function(data) {
+                        if (data && data.length > 0) {
+                            $.each(data, function(index, imovel) {
+                                imovelSelect.append('<option value="' + imovel.id + '">' + imovel.numero + ' - ' + imovel.tipo + ' (' + imovel.status + ')</option>');
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function abrirModalNovoPagamento() {
+            $('#filtroEmpreendimento').val('');
+            $('#filtroImovel').empty().append('<option value="">Selecione...</option>');
+            $('#pagamentoPendente').empty().append('<option value="">Primeiro selecione Empreendimento e Imóvel</option>');
+            $('#infoPagamentoSelecionado').hide();
+            $('#valorPago').val('');
+            
+            // Definir data padrão como hoje no formato dd/MM/yyyy
+            var hoje = new Date();
+            var dia = String(hoje.getDate()).padStart(2, '0');
+            var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            var ano = hoje.getFullYear();
+            $('#dataPagamentoNovo').val(dia + '/' + mes + '/' + ano);
+            
+            var modal = new bootstrap.Modal(document.getElementById('modalNovoPagamento'));
+            modal.show();
+        }
+
+        function carregarImoveisModal() {
+            var empreendimentoId = $('#filtroEmpreendimento').val();
+            var imovelSelect = $('#filtroImovel');
+            
+            imovelSelect.empty();
+            imovelSelect.append('<option value="">Selecione...</option>');
+            $('#pagamentoPendente').empty().append('<option value="">Primeiro selecione Empreendimento e Imóvel</option>');
+            $('#infoPagamentoSelecionado').hide();
+            
+            if (empreendimentoId) {
+                $.ajax({
+                    url: '@Url.Action("GetImoveisByEmpreendimento", "Entradas")',
+                    type: 'GET',
+                    data: { empreendimentoId: empreendimentoId },
+                    success: function(data) {
+                        if (data && data.length > 0) {
+                            $.each(data, function(index, imovel) {
+                                imovelSelect.append('<option value="' + imovel.id + '">' + imovel.numero + ' - ' + imovel.tipo + ' (' + imovel.status + ')</option>');
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function carregarPagamentosPendentes() {
+            var empreendimentoId = $('#filtroEmpreendimento').val();
+            var imovelId = $('#filtroImovel').val();
+            var pagamentoSelect = $('#pagamentoPendente');
+            
+            pagamentoSelect.empty();
+            $('#infoPagamentoSelecionado').hide();
+            
+            if (empreendimentoId && imovelId) {
+                pagamentoSelect.append('<option value="">Carregando...</option>');
+                $.ajax({
+                    url: '@Url.Action("GetPendentes", "Pagamentos")',
+                    type: 'GET',
+                    data: { empreendimentoId: empreendimentoId, imovelId: imovelId },
+                    success: function(data) {
+                        pagamentoSelect.empty();
+                        if (data && data.length > 0) {
+                            pagamentoSelect.append('<option value="">Selecione um pagamento pendente</option>');
+                            $.each(data, function(index, pagamento) {
+                                var valorExibir = pagamento.numeroParcelas > 1 ? 
+                                    'Parcela ' + pagamento.numeroParcela + '/' + pagamento.numeroParcelas + ' - R$ ' + parseFloat(pagamento.valorParcela || 0).toFixed(2) : 
+                                    'R$ ' + parseFloat(pagamento.valorParcela || 0).toFixed(2);
+                                var texto = 'Entrada #' + pagamento.entradaId + ' - ' + pagamento.tipo + ' - ' + valorExibir + ' - ' + pagamento.data;
+                                pagamentoSelect.append('<option value="' + pagamento.id + '" data-pagamento=\'' + JSON.stringify(pagamento) + '\'>' + texto + '</option>');
+                            });
+                        } else {
+                            pagamentoSelect.append('<option value="">Nenhum pagamento pendente encontrado</option>');
+                        }
+                    },
+                    error: function() {
+                        pagamentoSelect.empty();
+                        pagamentoSelect.append('<option value="">Erro ao carregar pagamentos</option>');
+                    }
+                });
+            } else {
+                pagamentoSelect.append('<option value="">Primeiro selecione Empreendimento e Imóvel</option>');
+            }
+        }
+
+        function preencherDadosPagamento() {
+            var pagamentoId = $('#pagamentoPendente').val();
+            var option = $('#pagamentoPendente option:selected');
+            
+            if (pagamentoId && option.data('pagamento')) {
+                pagamentoSelecionado = option.data('pagamento');
+                
+                // Usar valorParcela diretamente (já é o valor individual da parcela)
+                var valorParcela = parseFloat(pagamentoSelecionado.valorParcela || 0);
+                var numeroParcelas = parseInt(pagamentoSelecionado.numeroParcelas || 1);
+                var numeroParcela = parseInt(pagamentoSelecionado.numeroParcela || 1);
+                var valorTotal = parseFloat(pagamentoSelecionado.valorTotal || valorParcela);
+                
+                // Preencher valor pago com o valor da parcela
+                if (!isNaN(valorParcela) && valorParcela > 0) {
+                    $('#valorPago').val(valorParcela.toFixed(2));
+                } else {
+                    $('#valorPago').val('');
+                }
+                
+                // Exibir informações do pagamento
+                var detalhes = '<strong>Entrada:</strong> #' + pagamentoSelecionado.entradaId + '<br>';
+                detalhes += '<strong>Empreendimento:</strong> ' + (pagamentoSelecionado.empreendimento || '-') + '<br>';
+                detalhes += '<strong>Imóvel:</strong> ' + (pagamentoSelecionado.imovel || '-') + '<br>';
+                detalhes += '<strong>Tipo:</strong> ' + (pagamentoSelecionado.tipo || '-') + '<br>';
+                
+                if (numeroParcelas > 1) {
+                    detalhes += '<strong>Total Parcelado:</strong> R$ ' + valorTotal.toFixed(2) + '<br>';
+                    detalhes += '<strong>Parcela:</strong> ' + numeroParcela + '/' + numeroParcelas + '<br>';
+                    detalhes += '<strong>Valor da Parcela:</strong> <strong class="text-success">R$ ' + valorParcela.toFixed(2) + '</strong><br>';
+                } else {
+                    detalhes += '<strong>Valor Total:</strong> <strong class="text-success">R$ ' + valorParcela.toFixed(2) + '</strong><br>';
+                }
+                
+                detalhes += '<strong>Data de Vencimento:</strong> ' + (pagamentoSelecionado.data || '-');
+                
+                $('#detalhesPagamento').html(detalhes);
+                $('#infoPagamentoSelecionado').show();
+            } else {
+                $('#infoPagamentoSelecionado').hide();
+                $('#valorPago').val('');
+            }
+        }
+
+        function abrirCalendarioNovoPagamento() {
+            var inputTexto = $('#dataPagamentoNovo');
+            var inputDate = $('#dataPagamentoNovoHidden');
+            
+            // Se já tiver uma data no formato dd/MM/yyyy, converter para yyyy-MM-dd
+            var dataTexto = inputTexto.val();
+            if (dataTexto) {
+                var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                var match = dataTexto.match(regex);
+                if (match) {
+                    var dia = match[1];
+                    var mes = match[2];
+                    var ano = match[3];
+                    inputDate.val(ano + '-' + mes + '-' + dia);
+                }
+            } else {
+                // Se não tiver data, usar hoje
+                var hoje = new Date();
+                var ano = hoje.getFullYear();
+                var mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                var dia = String(hoje.getDate()).padStart(2, '0');
+                inputDate.val(ano + '-' + mes + '-' + dia);
+            }
+            
+            // Quando a data for selecionada, atualizar o campo de texto
+            inputDate.off('change').on('change', function() {
+                var dataSelecionada = $(this).val();
+                if (dataSelecionada) {
+                    var partes = dataSelecionada.split('-');
+                    if (partes.length === 3) {
+                        var dia = partes[2];
+                        var mes = partes[1];
+                        var ano = partes[0];
+                        inputTexto.val(dia + '/' + mes + '/' + ano);
+                    }
+                }
+                // Restaurar pointer-events após seleção
+                $(this).css('pointer-events', 'none');
+            });
+            
+            // Habilitar pointer-events temporariamente para abrir o calendário
+            inputDate.css('pointer-events', 'auto');
+            inputDate.css('position', 'fixed');
+            inputDate.css('left', '50%');
+            inputDate.css('top', '50%');
+            inputDate.css('transform', 'translate(-50%, -50%)');
+            inputDate.css('z-index', '9999');
+            
+            // Abrir o calendário nativo (se suportado)
+            setTimeout(function() {
+                if (inputDate[0] && typeof inputDate[0].showPicker === 'function') {
+                    inputDate[0].showPicker().catch(function() {
+                        // Se showPicker falhar, usar fallback
+                        inputDate[0].focus();
+                        inputDate[0].click();
+                    });
+                } else {
+                    // Fallback: focar no input date (alguns navegadores abrem o calendário ao focar)
+                    inputDate[0].focus();
+                    inputDate[0].click();
+                }
+                
+                // Restaurar posição após um tempo
+                setTimeout(function() {
+                    inputDate.css('position', 'absolute');
+                    inputDate.css('left', '-9999px');
+                    inputDate.css('top', 'auto');
+                    inputDate.css('transform', 'none');
+                    inputDate.css('z-index', 'auto');
+                    inputDate.css('pointer-events', 'none');
+                }, 100);
+            }, 10);
+        }
+
+        function salvarNovoPagamento() {
+            var pagamentoId = $('#pagamentoPendente').val();
+            var valorPago = $('#valorPago').val();
+            var dataPagamento = $('#dataPagamentoNovo').val();
+
+            if (!pagamentoId) {
+                alert('Por favor, selecione um pagamento pendente.');
+                return;
+            }
+
+            // Verificar se é parcelado
+            var numeroParcelas = pagamentoSelecionado?.numeroParcelas || 0;
+            var isParcelado = numeroParcelas > 1;
+
+            // Se não for parcelado, validar valor pago
+            if (!isParcelado) {
+                if (!valorPago || parseFloat(valorPago) <= 0) {
+                    alert('Por favor, informe o valor pago.');
+                    return;
+                }
+            }
+
+            if (!dataPagamento) {
+                alert('Por favor, informe a data de pagamento.');
+                return;
+            }
+
+            // Validar formato de data dd/MM/yyyy
+            var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            var match = dataPagamento.match(regex);
+            if (!match) {
+                alert('Formato de data inválido. Use o formato dd/MM/yyyy.');
+                return;
+            }
+
+            var dia = parseInt(match[1], 10);
+            var mes = parseInt(match[2], 10);
+            var ano = parseInt(match[3], 10);
+            
+            if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                var data = new Date(ano, mes - 1, dia);
+                if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                    // Converter para yyyy-MM-dd
+                    var dataFormatada = ano + '-' + 
+                        (mes < 10 ? '0' + mes : mes) + '-' + 
+                        (dia < 10 ? '0' + dia : dia);
+                    
+                    // Sempre usar o valor informado ou o valor da parcela
+                    // Se for parcelado, usar o valor da parcela (valorParcela do pagamento selecionado)
+                    // Se não for parcelado, usar o valor informado pelo usuário
+                    var valorPagoFinal;
+                    if (isParcelado) {
+                        // Usar o valor da parcela do pagamento selecionado (já está preenchido no campo)
+                        valorPagoFinal = parseFloat(valorPago || pagamentoSelecionado.valorParcela || 0);
+                    } else {
+                        // Usar o valor informado pelo usuário
+                        valorPagoFinal = parseFloat(valorPago || 0);
+                    }
+                    
+                    // Garantir que o valor seja maior que 0
+                    if (valorPagoFinal <= 0) {
+                        alert('Por favor, informe um valor pago válido.');
+                        return;
+                    }
+                    
+                    var model = {
+                        id: parseInt(pagamentoId),
+                        valorPago: valorPagoFinal,
+                        dataPagamento: dataFormatada
+                    };
+
+                    $.ajax({
+                        url: '@Url.Action("MarcarComoPago", "Pagamentos")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(model),
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('Erro ao salvar o pagamento.');
+                        }
+                    });
+                } else {
+                    alert('Data de pagamento inválida.');
+                }
+            } else {
+                alert('Data de pagamento inválida.');
+            }
+        }
+
+        function abrirModalEditar(id) {
+            $.ajax({
+                url: '@Url.Action("GetPagamento", "Pagamentos")',
+                type: 'GET',
+                data: { id: id },
+                success: function(data) {
+                    pagamentoAtual = data;
+                    
+                    $('#pagamentoId').val(data.id);
+                    $('#statusPagamento').val(data.status);
+                    
+                    if (data.dataPagamento) {
+                        var dataParts = data.dataPagamento.split('-');
+                        if (dataParts.length === 3) {
+                            $('#dataPagamento').val(dataParts[2] + '/' + dataParts[1] + '/' + dataParts[0]);
+                        }
+                    } else {
+                        $('#dataPagamento').val('');
+                    }
+
+                    var info = '<strong>Entrada:</strong> #' + data.entradaId + '<br>';
+                    info += '<strong>Empreendimento:</strong> ' + (data.empreendimento || '-') + '<br>';
+                    info += '<strong>Imóvel:</strong> ' + (data.imovel || '-') + '<br>';
+                    info += '<strong>Tipo:</strong> ' + data.tipo + '<br>';
+                    info += '<strong>Valor:</strong> R$ ' + parseFloat(data.valorTotal).toFixed(2) + '<br>';
+                    info += '<strong>Data:</strong> ' + data.data;
+                    $('#infoPagamento').html(info);
+
+                    var modal = new bootstrap.Modal(document.getElementById('modalEditarPagamento'));
+                    modal.show();
+                },
+                error: function() {
+                    alert('Erro ao carregar dados do pagamento.');
+                }
+            });
+        }
+
+        function salvarEdicaoPagamento() {
+            var status = $('#statusPagamento').val();
+            var dataPagamento = $('#dataPagamento').val();
+
+            if (!status) {
+                alert('Por favor, selecione o status.');
+                return;
+            }
+
+            var dataPagamentoFormatada = null;
+            if (dataPagamento) {
+                var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                var match = dataPagamento.match(regex);
+                if (match) {
+                    var dia = parseInt(match[1], 10);
+                    var mes = parseInt(match[2], 10);
+                    var ano = parseInt(match[3], 10);
+                    
+                    if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                        var data = new Date(ano, mes - 1, dia);
+                        if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                            dataPagamentoFormatada = ano + '-' + 
+                                (mes < 10 ? '0' + mes : mes) + '-' + 
+                                (dia < 10 ? '0' + dia : dia);
+                        } else {
+                            alert('Data de pagamento inválida.');
+                            return;
+                        }
+                    } else {
+                        alert('Data de pagamento inválida.');
+                        return;
+                    }
+                } else {
+                    alert('Formato de data inválido. Use o formato dd/MM/yyyy.');
+                    return;
+                }
+            }
+
+            var model = {
+                id: parseInt($('#pagamentoId').val()),
+                status: status,
+                dataPagamento: dataPagamentoFormatada
+            };
+
+            $.ajax({
+                url: '@Url.Action("UpdateStatus", "Pagamentos")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Erro ao salvar as alterações.');
+                }
+            });
+        }
+
+        // Máscara de data para os campos de texto
+        $(document).on('input', '#dataPagamento, #dataPagamentoNovo', function() {
+            var value = $(this).val().replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 2) {
+                    value = value;
+                } else if (value.length <= 4) {
+                    value = value.substring(0, 2) + '/' + value.substring(2);
+                } else {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+                }
+                $(this).val(value);
+            }
+        });
+    </script>
+}

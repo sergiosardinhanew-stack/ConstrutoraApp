@@ -1,0 +1,99 @@
+@model ConstrutoraApp.Models.Entrada
+
+@{
+    ViewData["Title"] = "Adicionar Parcelamento";
+    var entrada = ViewBag.Entrada as ConstrutoraApp.Models.Entrada;
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-plus-circle"></i> Adicionar Parcelamento</h1>
+    <hr />
+
+    @if (entrada != null)
+    {
+        <div class="alert alert-info">
+            <strong>Entrada:</strong> @entrada.Empreendimento?.Nome
+            @if (entrada.ImovelId.HasValue)
+            {
+                <text> - Imóvel: @entrada.Imovel?.Numero</text>
+            }
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="AdicionarParcelamento" asp-route-id="@entrada?.Id">
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <hr class="my-4" />
+                <h5 class="mb-3"><i class="bi bi-credit-card"></i> Informações de Pagamento</h5>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="TipoPagamento" class="form-label">
+                            <strong>Tipo de Pagamento</strong> <span class="text-danger">*</span>
+                        </label>
+                        <select id="TipoPagamento" name="TipoPagamento" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Mensal">Mensal</option>
+                            <option value="Anual">Anual</option>
+                            <option value="Investimento">Investimento</option>
+                            <option value="Financiamento">Financiamento</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="TipoPagamento" data-valmsg-replace="true"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="NumeroParcelas" class="form-label">
+                            <strong>Número de Parcelas</strong>
+                        </label>
+                        <input type="number" id="NumeroParcelas" name="NumeroParcelas" class="form-control" min="1" step="1" />
+                        <small class="form-text text-muted">Deixe em branco para pagamento único</small>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="ValorTotal" class="form-label">
+                            <strong>Valor Total</strong> <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" id="ValorTotal" name="ValorTotal" class="form-control" step="0.01" min="0" required />
+                        <small class="form-text text-muted">Valor total a ser parcelado</small>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="ValorTotal" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Adicionar Parcelamento
+                    </button>
+                    <a asp-action="Details" asp-route-id="@entrada?.Id" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Formatar valores para 2 casas decimais
+        document.getElementById('ValorTotal').addEventListener('blur', function() {
+            var value = parseFloat(this.value);
+            if (!isNaN(value)) {
+                this.value = value.toFixed(2);
+            }
+        });
+    </script>
+}
+

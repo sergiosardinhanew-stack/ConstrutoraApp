@@ -263,4 +263,5 @@ C:\Users\ex1olivese\source\repos\ConstrutoraApp\ConstrutoraApp\obj\Debug\net8.0\
 C:\Users\ex1olivese\source\repos\ConstrutoraApp\ConstrutoraApp\obj\Debug\net8.0\ConstrutoraApp.pdb
 C:\Users\ex1olivese\source\repos\ConstrutoraApp\ConstrutoraApp\obj\Debug\net8.0\ConstrutoraApp.genruntimeconfig.cache
 C:\Users\ex1olivese\source\repos\ConstrutoraApp\ConstrutoraApp\obj\Debug\net8.0\ref\ConstrutoraApp.dll
+C:\Users\ex1olivese\source\repos\ConstrutoraApp\ConstrutoraApp\obj\Debug\net8.0\ConstrutoraApp.sourcelink.json
 C:\Users\ex1olivese\source\repos\ConstrutoraApp\ConstrutoraApp\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

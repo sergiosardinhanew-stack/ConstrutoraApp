@@ -1,0 +1,214 @@
+@model ConstrutoraApp.Models.Pagamento
+
+@{
+    ViewData["Title"] = "Editar Pagamento";
+    var entrada = ViewBag.Entrada as ConstrutoraApp.Models.Entrada;
+}
+
+<div class="container-fluid">
+    <h1><i class="bi bi-pencil"></i> Editar Pagamento</h1>
+    <hr />
+
+    @if (entrada != null)
+    {
+        <div class="alert alert-info">
+            <strong>Entrada:</strong> @entrada.Empreendimento?.Nome
+            @if (entrada.ImovelId.HasValue)
+            {
+                <text> - Imóvel: @entrada.Imovel?.Numero</text>
+            }
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ParcelamentoId" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Status" class="form-label">
+                            <strong>Status</strong> <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="Status" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <option value="Pago">Pago</option>
+                            <option value="Pendente">Pendente</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="NumeroParcela" class="form-label">
+                            <strong>Número da Parcela</strong>
+                        </label>
+                        <input asp-for="NumeroParcela" class="form-control" type="number" min="1" readonly />
+                        <span asp-validation-for="NumeroParcela" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ValorParcela" class="form-label">
+                            <strong>Valor da Parcela</strong> <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="ValorParcela" class="form-control" type="number" step="0.01" required />
+                        <span asp-validation-for="ValorParcela" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DataVencimento" class="form-label">
+                            <strong>Data de Vencimento</strong> <span class="text-danger">*</span>
+                        </label>
+                        <input id="DataVencimentoInput" class="form-control" type="text" placeholder="dd/MM/yyyy" value="@Model.DataVencimento.ToString("dd/MM/yyyy")" required maxlength="10" />
+                        <input type="hidden" asp-for="DataVencimento" id="DataVencimento" />
+                        <small class="form-text text-muted">Formato: dd/MM/yyyy</small>
+                        <span asp-validation-for="DataVencimento" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DataPagamento" class="form-label">
+                        <strong>Data de Pagamento</strong> <span class="text-muted">(Opcional)</span>
+                    </label>
+                    @{
+                        var dataPagamentoInput = Model.DataPagamento.HasValue ? Model.DataPagamento.Value.ToString("dd/MM/yyyy") : "";
+                    }
+                    <input id="DataPagamentoInput" class="form-control" type="text" placeholder="dd/MM/yyyy" value="@dataPagamentoInput" maxlength="10" />
+                    <input type="hidden" asp-for="DataPagamento" id="DataPagamento" />
+                    <small class="form-text text-muted">Data em que o pagamento foi realizado</small>
+                    <span asp-validation-for="DataPagamento" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle"></i> Salvar Alterações
+                    </button>
+                    @if (Model.Parcelamento?.Entrada != null)
+                    {
+                        <a asp-controller="Entradas" asp-action="Details" asp-route-id="@Model.Parcelamento.Entrada.Id" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Máscara para data de vencimento dd/MM/yyyy
+            $('#DataVencimentoInput').on('input', function() {
+                var value = $(this).val().replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.length <= 2) {
+                        value = value;
+                    } else if (value.length <= 4) {
+                        value = value.substring(0, 2) + '/' + value.substring(2);
+                    } else {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+                    }
+                    $(this).val(value);
+                }
+            });
+
+            // Máscara para data de pagamento dd/MM/yyyy
+            $('#DataPagamentoInput').on('input', function() {
+                var value = $(this).val().replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.length <= 2) {
+                        value = value;
+                    } else if (value.length <= 4) {
+                        value = value.substring(0, 2) + '/' + value.substring(2);
+                    } else {
+                        value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
+                    }
+                    $(this).val(value);
+                }
+            });
+
+            // Converter dd/MM/yyyy para yyyy-MM-dd antes de enviar
+            $('form').on('submit', function(e) {
+                var dataVencimentoInput = $('#DataVencimentoInput').val();
+                if (dataVencimentoInput) {
+                    // Validar formato
+                    var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                    var match = dataVencimentoInput.match(regex);
+                    if (match) {
+                        var dia = parseInt(match[1], 10);
+                        var mes = parseInt(match[2], 10);
+                        var ano = parseInt(match[3], 10);
+                        
+                        // Validar data
+                        if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                            var data = new Date(ano, mes - 1, dia);
+                            if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                                // Converter para yyyy-MM-dd
+                                var dataFormatada = ano + '-' + 
+                                    (mes < 10 ? '0' + mes : mes) + '-' + 
+                                    (dia < 10 ? '0' + dia : dia);
+                                $('#DataVencimento').val(dataFormatada);
+                            } else {
+                                e.preventDefault();
+                                alert('Data inválida. Por favor, verifique o dia, mês e ano.');
+                                return false;
+                            }
+                        } else {
+                            e.preventDefault();
+                            alert('Data inválida. Por favor, verifique o dia, mês e ano.');
+                            return false;
+                        }
+                    } else {
+                        e.preventDefault();
+                        alert('Formato de data inválido. Use o formato dd/MM/yyyy.');
+                        return false;
+                    }
+                } else {
+                    e.preventDefault();
+                    alert('Por favor, informe a data de vencimento.');
+                    return false;
+                }
+
+                // Converter data de pagamento dd/MM/yyyy para yyyy-MM-dd antes de enviar
+                var dataPagamentoInput = $('#DataPagamentoInput').val();
+                if (dataPagamentoInput) {
+                    var regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+                    var match = dataPagamentoInput.match(regex);
+                    if (match) {
+                        var dia = parseInt(match[1], 10);
+                        var mes = parseInt(match[2], 10);
+                        var ano = parseInt(match[3], 10);
+                        
+                        if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12 && ano >= 1900 && ano <= 2100) {
+                            var data = new Date(ano, mes - 1, dia);
+                            if (data.getDate() == dia && data.getMonth() == mes - 1 && data.getFullYear() == ano) {
+                                var dataFormatada = ano + '-' + 
+                                    (mes < 10 ? '0' + mes : mes) + '-' + 
+                                    (dia < 10 ? '0' + dia : dia);
+                                $('#DataPagamento').val(dataFormatada);
+                            } else {
+                                e.preventDefault();
+                                alert('Data de pagamento inválida. Por favor, verifique o dia, mês e ano.');
+                                return false;
+                            }
+                        } else {
+                            e.preventDefault();
+                            alert('Data de pagamento inválida. Por favor, verifique o dia, mês e ano.');
+                            return false;
+                        }
+                    } else {
+                        e.preventDefault();
+                        alert('Formato de data de pagamento inválido. Use o formato dd/MM/yyyy.');
+                        return false;
+                    }
+                } else {
+                    $('#DataPagamento').val('');
+                }
+            });
+        });
+    </script>
+}
+

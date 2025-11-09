@@ -33,44 +33,21 @@
                     <span asp-validation-for="ImovelId" class="text-danger"></span>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Tipo" class="form-label">
-                            <strong>Tipo</strong> <span class="text-danger">*</span>
-                        </label>
-                        <select asp-for="Tipo" class="form-select" required>
-                            <option value="">Selecione...</option>
-                            <option value="Entrada">Entrada</option>
-                            <option value="Parcela">Parcela</option>
-                            <option value="Anual">Anual</option>
-                            <option value="Investimento">Investimento</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                        <span asp-validation-for="Tipo" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Valor" class="form-label"></label>
-                        <input asp-for="Valor" class="form-control" type="number" step="0.01" />
-                        <span asp-validation-for="Valor" class="text-danger"></span>
-                    </div>
-                </div>
-
                 <div class="mb-3">
-                    <label asp-for="Descricao" class="form-label"></label>
+                    <label asp-for="Descricao" class="form-label">
+                        <strong>Descrição</strong> <span class="text-muted">(Opcional)</span>
+                    </label>
                     <textarea asp-for="Descricao" class="form-control" rows="3"></textarea>
                     <span asp-validation-for="Descricao" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Data" class="form-label"></label>
-                    <input asp-for="Data" class="form-control" type="date" />
-                    <span asp-validation-for="Data" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <button type="submit" class="btn btn-warning">
                         <i class="bi bi-check-circle"></i> Salvar Alterações
                     </button>
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                        <i class="bi bi-eye"></i> Ver Detalhes
+                    </a>
                     <a asp-action="Index" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Voltar
                     </a>

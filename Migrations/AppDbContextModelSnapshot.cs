@@ -166,9 +166,6 @@ namespace ConstrutoraApp.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Data")
-                        .HasColumnType("datetime");
-
                     b.Property<string>("Descricao")
                         .HasColumnType("longtext");
 
@@ -177,13 +174,6 @@ namespace ConstrutoraApp.Migrations
 
                     b.Property<int?>("ImovelId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Tipo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("Id");
 
@@ -268,6 +258,68 @@ namespace ConstrutoraApp.Migrations
                     b.ToTable("Movimentacoes");
                 });
 
+            modelBuilder.Entity("ConstrutoraApp.Models.Pagamento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DataPagamento")
+                        .HasColumnType("datetime");
+
+                    b.Property<DateTime>("DataVencimento")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("NumeroParcela")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ParcelamentoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("ValorParcela")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParcelamentoId");
+
+                    b.ToTable("Pagamentos");
+                });
+
+            modelBuilder.Entity("ConstrutoraApp.Models.Parcelamento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EntradaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumeroParcelas")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TipoPagamento")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("ValorTotal")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntradaId");
+
+                    b.ToTable("Parcelamentos");
+                });
+
             modelBuilder.Entity("ConstrutoraApp.Models.Contrato", b =>
                 {
                     b.HasOne("ConstrutoraApp.Models.Imovel", "Imovel")
@@ -319,6 +371,28 @@ namespace ConstrutoraApp.Migrations
                     b.Navigation("Empreendimento");
                 });
 
+            modelBuilder.Entity("ConstrutoraApp.Models.Pagamento", b =>
+                {
+                    b.HasOne("ConstrutoraApp.Models.Parcelamento", "Parcelamento")
+                        .WithMany("Pagamentos")
+                        .HasForeignKey("ParcelamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parcelamento");
+                });
+
+            modelBuilder.Entity("ConstrutoraApp.Models.Parcelamento", b =>
+                {
+                    b.HasOne("ConstrutoraApp.Models.Entrada", "Entrada")
+                        .WithMany("Parcelamentos")
+                        .HasForeignKey("EntradaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entrada");
+                });
+
             modelBuilder.Entity("ConstrutoraApp.Models.Empreendimento", b =>
                 {
                     b.Navigation("Custos");
@@ -328,9 +402,19 @@ namespace ConstrutoraApp.Migrations
                     b.Navigation("Imoveis");
                 });
 
+            modelBuilder.Entity("ConstrutoraApp.Models.Entrada", b =>
+                {
+                    b.Navigation("Parcelamentos");
+                });
+
             modelBuilder.Entity("ConstrutoraApp.Models.Imovel", b =>
                 {
                     b.Navigation("Contrato");
+                });
+
+            modelBuilder.Entity("ConstrutoraApp.Models.Parcelamento", b =>
+                {
+                    b.Navigation("Pagamentos");
                 });
 #pragma warning restore 612, 618
         }

@@ -32,43 +32,58 @@
                     <span asp-validation-for="ImovelId" class="text-danger"></span>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Tipo" class="form-label">
-                            <strong>Tipo</strong> <span class="text-danger">*</span>
-                        </label>
-                        <select asp-for="Tipo" class="form-select" required>
-                            <option value="">Selecione...</option>
-                            <option value="Entrada">Entrada</option>
-                            <option value="Parcela">Parcela</option>
-                            <option value="Anual">Anual</option>
-                            <option value="Investimento">Investimento</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                        <span asp-validation-for="Tipo" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Valor" class="form-label"></label>
-                        <input asp-for="Valor" class="form-control" type="number" step="0.01" />
-                        <span asp-validation-for="Valor" class="text-danger"></span>
-                    </div>
-                </div>
-
                 <div class="mb-3">
-                    <label asp-for="Descricao" class="form-label"></label>
+                    <label asp-for="Descricao" class="form-label">
+                        <strong>Descrição</strong> <span class="text-muted">(Opcional)</span>
+                    </label>
                     <textarea asp-for="Descricao" class="form-control" rows="3"></textarea>
                     <span asp-validation-for="Descricao" class="text-danger"></span>
                 </div>
 
+                <hr class="my-4" />
+                <h5 class="mb-3"><i class="bi bi-credit-card"></i> Informações de Pagamento</h5>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="TipoPagamento" class="form-label">
+                            <strong>Tipo de Pagamento</strong> <span class="text-danger">*</span>
+                        </label>
+                        <select id="TipoPagamento" name="TipoPagamento" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Mensal">Mensal</option>
+                            <option value="Anual">Anual</option>
+                            <option value="Investimento">Investimento</option>
+                            <option value="Financiamento">Financiamento</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="NumeroParcelas" class="form-label">
+                            <strong>Número de Parcelas</strong>
+                        </label>
+                        <input type="number" id="NumeroParcelas" name="NumeroParcelas" class="form-control" min="1" step="1" />
+                        <small class="form-text text-muted">Deixe em branco para pagamento único</small>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="ValorTotal" class="form-label">
+                            <strong>Valor Total</strong> <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" id="ValorTotal" name="ValorTotal" class="form-control" step="0.01" min="0" required />
+                        <small class="form-text text-muted">Valor total a ser parcelado</small>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="ValorTotal" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                
                 <div class="mb-3">
-                    <label asp-for="Data" class="form-label"></label>
-                    <input asp-for="Data" class="form-control" type="date" />
-                    <span asp-validation-for="Data" class="text-danger"></span>
+                    <span class="text-danger field-validation-valid" data-valmsg-for="TipoPagamento" data-valmsg-replace="true"></span>
                 </div>
 
                 <div class="mb-3">
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Criar
+                        <i class="bi bi-check-circle"></i> Criar Entrada
                     </button>
                     <a asp-action="Index" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Voltar

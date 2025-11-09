@@ -15,15 +15,41 @@
     <div class="row">
         <div class="col-md-8">
             <dl class="row">
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Empreendimento)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Empreendimento!.Nome)</dd>
+
+                @if (Model.ImovelId.HasValue)
+                {
+                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Imovel)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Imovel!.Numero)</dd>
+                }
+
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Descricao)</dt>
                 <dd class="col-sm-9">@Html.DisplayFor(model => model.Descricao)</dd>
 
-                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Valor)</dt>
-                <dd class="col-sm-9">R$ @Model.Valor.ToString("N2")</dd>
-
-                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Empreendimento)</dt>
-                <dd class="col-sm-9">@Html.DisplayFor(model => model.Empreendimento!.Nome)</dd>
+                <dt class="col-sm-3">Total de Parcelamentos</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Parcelamentos != null && Model.Parcelamentos.Any())
+                    {
+                        var totalParcelas = Model.Parcelamentos.Sum(p => p.Pagamentos?.Count ?? 0);
+                        var valorTotal = Model.Parcelamentos.Sum(p => p.ValorTotal);
+                        <strong class="text-success">R$ @valorTotal.ToString("N2")</strong>
+                        <span class="text-muted">(@totalParcelas parcela(s))</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Nenhum parcelamento</span>
+                    }
+                </dd>
             </dl>
+            
+            @if (Model.Parcelamentos != null && Model.Parcelamentos.Any())
+            {
+                var totalParcelas = Model.Parcelamentos.Sum(p => p.Pagamentos?.Count ?? 0);
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> <strong>Atenção:</strong> Esta entrada possui <strong>@totalParcelas</strong> parcela(s) que também serão excluídas.
+                </div>
+            }
 
             <form asp-action="Delete">
                 <input type="hidden" asp-for="Id" />

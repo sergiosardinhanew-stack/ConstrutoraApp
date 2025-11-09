@@ -10,22 +10,99 @@
 
     <div class="row">
         <div class="col-md-8">
-            <dl class="row">
-                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Descricao)</dt>
-                <dd class="col-sm-9">@Html.DisplayFor(model => model.Descricao)</dd>
+            <!-- Cabeçalho -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informações da Entrada</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Empreendimento)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Empreendimento!.Nome)</dd>
 
-                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Tipo)</dt>
-                <dd class="col-sm-9">@Html.DisplayFor(model => model.Tipo)</dd>
+                        @if (Model.ImovelId.HasValue)
+                        {
+                            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Imovel)</dt>
+                            <dd class="col-sm-9">@Html.DisplayFor(model => model.Imovel!.Numero)</dd>
+                        }
 
-                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Empreendimento)</dt>
-                <dd class="col-sm-9">@Html.DisplayFor(model => model.Empreendimento!.Nome)</dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Descricao)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Descricao)</dd>
+                    </dl>
+                </div>
+            </div>
 
-                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Valor)</dt>
-                <dd class="col-sm-9">R$ @Model.Valor.ToString("N2")</dd>
-
-                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Data)</dt>
-                <dd class="col-sm-9">@Html.DisplayFor(model => model.Data)</dd>
-            </dl>
+            <!-- Pagamentos -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Parcelamentos e Pagamentos</h5>
+                    <a asp-action="AdicionarParcelamento" asp-route-id="@Model.Id" class="btn btn-sm btn-light">
+                        <i class="bi bi-plus-circle"></i> Novo Parcelamento
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Parcelamentos != null && Model.Parcelamentos.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Número de Parcelas</th>
+                                        <th>Valor Total</th>
+                                        <th>Parcelas Pagas</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var parcelamento in Model.Parcelamentos)
+                                    {
+                                        var pagamentosPagos = parcelamento.Pagamentos?.Count(p => p.Status == "Pago") ?? 0;
+                                        var totalParcelas = parcelamento.NumeroParcelas;
+                                        <tr>
+                                            <td>@parcelamento.TipoPagamento</td>
+                                            <td>@totalParcelas</td>
+                                            <td>R$ @parcelamento.ValorTotal.ToString("N2")</td>
+                                            <td>
+                                                <span class="badge @(pagamentosPagos == totalParcelas ? "bg-success" : "bg-warning text-dark")">
+                                                    @pagamentosPagos / @totalParcelas
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-controller="Pagamentos" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Ver Parcelas
+                                                    </a>
+                                                    <form asp-action="ExcluirParcelamento" asp-route-id="@parcelamento.Id" method="post" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir este parcelamento e todos os seus pagamentos? Esta ação não pode ser desfeita.');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="entradaId" value="@Model.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                            <i class="bi bi-trash"></i> Excluir Parcelas
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-info">
+                                        <th colspan="2">Total</th>
+                                        <th>R$ @(Model.Parcelamentos.Sum(p => p.ValorTotal).ToString("N2"))</th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Nenhum parcelamento cadastrado. Os parcelamentos são criados automaticamente ao criar uma entrada.
+                        </div>
+                    }
+                </div>
+            </div>
 
             <div class="mb-3">
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
@@ -38,4 +115,3 @@
         </div>
     </div>
 </div>
-

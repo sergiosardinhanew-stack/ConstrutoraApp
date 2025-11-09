@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ConstrutoraApp.Models
@@ -16,15 +17,10 @@ namespace ConstrutoraApp.Models
 
         public Imovel? Imovel { get; set; }
 
-        [Required]
-        public string Tipo { get; set; } // Entrada, Parcela, Anual, Investimento, Outros
-
         public string? Descricao { get; set; }
 
-        public decimal Valor { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime Data { get; set; }
+        // Relação com Parcelamentos (resumo do parcelamento)
+        public ICollection<Parcelamento>? Parcelamentos { get; set; }
     }
 }
 

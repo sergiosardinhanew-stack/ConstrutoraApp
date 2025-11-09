@@ -32,12 +32,18 @@ namespace ConstrutoraApp.Controllers
 
             var imoveis = await imoveisQuery.ToListAsync();
 
-            // Calcular valor recebido para cada imóvel em uma única consulta
+            // Calcular valor recebido para cada imóvel em uma única consulta (apenas pagamentos realizados)
             var idsImoveis = imoveis.Select(i => i.Id).ToList();
-            var valoresRecebidos = await _context.Entradas
-                .Where(e => e.ImovelId.HasValue && idsImoveis.Contains(e.ImovelId.Value))
-                .GroupBy(e => e.ImovelId.Value)
-                .Select(g => new { ImovelId = g.Key, ValorRecebido = g.Sum(e => e.Valor) })
+            var valoresRecebidos = await _context.Pagamentos
+                .Include(p => p.Parcelamento!)
+                    .ThenInclude(par => par!.Entrada)
+                .Where(p => p.Status == "Pago" && 
+                           p.Parcelamento != null && 
+                           p.Parcelamento.Entrada != null && 
+                           p.Parcelamento.Entrada.ImovelId.HasValue && 
+                           idsImoveis.Contains(p.Parcelamento.Entrada.ImovelId.Value))
+                .GroupBy(p => p.Parcelamento!.Entrada!.ImovelId!.Value)
+                .Select(g => new { ImovelId = g.Key, ValorRecebido = g.Sum(p => p.ValorParcela) })
                 .ToDictionaryAsync(x => x.ImovelId, x => x.ValorRecebido);
 
             // Criar dicionário completo com todos os imóveis (incluindo os que não têm entradas)
@@ -71,10 +77,15 @@ namespace ConstrutoraApp.Controllers
                 return NotFound();
             }
 
-            // Calcular valor recebido para este imóvel
-            var valorRecebido = await _context.Entradas
-                .Where(e => e.ImovelId == imovel.Id)
-                .SumAsync(e => (decimal?)e.Valor) ?? 0;
+            // Calcular valor recebido para este imóvel (apenas pagamentos realizados)
+            var valorRecebido = await _context.Pagamentos
+                .Include(p => p.Parcelamento!)
+                    .ThenInclude(par => par!.Entrada)
+                .Where(p => p.Status == "Pago" && 
+                           p.Parcelamento != null && 
+                           p.Parcelamento.Entrada != null && 
+                           p.Parcelamento.Entrada.ImovelId == imovel.Id)
+                .SumAsync(p => (decimal?)p.ValorParcela) ?? 0;
 
             ViewBag.ValorRecebido = valorRecebido;
 
@@ -93,6 +104,18 @@ namespace ConstrutoraApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,EmpreendimentoId,Tipo,Numero,Metragem,Quartos,Andar,ValorVenda,Status")] Imovel imovel)
         {
+            // Validar se já existe um imóvel com o mesmo número no mesmo empreendimento
+            if (!string.IsNullOrEmpty(imovel.Numero))
+            {
+                var imovelExistente = await _context.Imoveis
+                    .FirstOrDefaultAsync(i => i.EmpreendimentoId == imovel.EmpreendimentoId && 
+                                             i.Numero == imovel.Numero);
+                if (imovelExistente != null)
+                {
+                    ModelState.AddModelError("Numero", "Já existe um imóvel com este número neste empreendimento.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(imovel);
@@ -128,6 +151,19 @@ namespace ConstrutoraApp.Controllers
             if (id != imovel.Id)
             {
                 return NotFound();
+            }
+
+            // Validar se já existe um imóvel com o mesmo número no mesmo empreendimento (excluindo o imóvel atual)
+            if (!string.IsNullOrEmpty(imovel.Numero))
+            {
+                var imovelExistente = await _context.Imoveis
+                    .FirstOrDefaultAsync(i => i.Id != imovel.Id &&
+                                             i.EmpreendimentoId == imovel.EmpreendimentoId && 
+                                             i.Numero == imovel.Numero);
+                if (imovelExistente != null)
+                {
+                    ModelState.AddModelError("Numero", "Já existe um imóvel com este número neste empreendimento.");
+                }
             }
 
             if (ModelState.IsValid)
