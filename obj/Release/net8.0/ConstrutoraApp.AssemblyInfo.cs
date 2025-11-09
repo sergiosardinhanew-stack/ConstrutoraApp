@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ConstrutoraApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3146cfd42ea351876fe64282db144a28e11f773e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+36140e7495d3e8ac750b131089c5309dfad52f81")]
 [assembly: System.Reflection.AssemblyProductAttribute("ConstrutoraApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ConstrutoraApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
