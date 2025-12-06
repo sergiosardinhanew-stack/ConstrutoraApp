@@ -1,8 +1,14 @@
 using ConstrutoraApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar cultura brasileira (pt-BR) para toda a aplicação
+var cultureInfo = new CultureInfo("pt-BR");
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 // Add services
 builder.Services.AddControllersWithViews();
@@ -25,6 +31,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 var app = builder.Build();
+
+// Middleware para garantir cultura brasileira em todas as requisições
+app.Use(async (context, next) =>
+{
+    var cultureInfo = new CultureInfo("pt-BR");
+    CultureInfo.CurrentCulture = cultureInfo;
+    CultureInfo.CurrentUICulture = cultureInfo;
+    await next();
+});
 
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())

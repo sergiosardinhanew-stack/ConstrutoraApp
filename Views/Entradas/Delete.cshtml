@@ -33,7 +33,7 @@
                     {
                         var totalParcelas = Model.Parcelamentos.Sum(p => p.Pagamentos?.Count ?? 0);
                         var valorTotal = Model.Parcelamentos.Sum(p => p.ValorTotal);
-                        <strong class="text-success">R$ @valorTotal.ToString("N2")</strong>
+                        <strong class="text-success">R$ @valorTotal.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</strong>
                         <span class="text-muted">(@totalParcelas parcela(s))</span>
                     }
                     else

@@ -60,7 +60,7 @@
                                 @if (item.Parcelamentos != null && item.Parcelamentos.Any())
                                 {
                                     var valorTotal = item.Parcelamentos.Sum(p => p.ValorTotal);
-                                    <strong class="text-success">R$ @valorTotal.ToString("N2")</strong>
+                                    <strong class="text-success">R$ @valorTotal.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</strong>
                                 }
                                 else
                                 {

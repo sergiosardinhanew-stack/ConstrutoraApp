@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp\\ConstrutoraApp.csproj": {}
+    "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp\\ConstrutoraApp.csproj": {
+    "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp\\ConstrutoraApp.csproj",
+        "projectUniqueName": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp.csproj",
         "projectName": "ConstrutoraApp",
-        "projectPath": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp\\ConstrutoraApp.csproj",
+        "projectPath": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp.csproj",
         "packagesPath": "C:\\Users\\ex1olivese\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp\\obj\\",
+        "outputPath": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

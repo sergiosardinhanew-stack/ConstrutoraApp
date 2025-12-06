@@ -34,7 +34,7 @@
                 <dd class="col-sm-9">@Model.NumeroParcela</dd>
 
                 <dt class="col-sm-3">Valor da Parcela</dt>
-                <dd class="col-sm-9"><strong class="text-success">R$ @Model.ValorParcela.ToString("N2")</strong></dd>
+                <dd class="col-sm-9"><strong class="text-success">R$ @Model.ValorParcela.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</strong></dd>
 
                 <dt class="col-sm-3">Status</dt>
                 <dd class="col-sm-9">

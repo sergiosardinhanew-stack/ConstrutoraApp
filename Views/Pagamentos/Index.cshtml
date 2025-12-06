@@ -134,7 +134,7 @@
                             <td>
                                 @if (item.ValorParcela > 0)
                                 {
-                                    <strong class="text-success">R$ @item.ValorParcela.ToString("N2")</strong>
+                                    <strong class="text-success">R$ @item.ValorParcela.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</strong>
                                 }
                                 else
                                 {

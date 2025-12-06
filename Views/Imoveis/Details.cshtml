@@ -21,7 +21,7 @@
                 <dd class="col-sm-9">@Html.DisplayFor(model => model.Empreendimento!.Nome)</dd>
 
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Metragem)</dt>
-                <dd class="col-sm-9">@Model.Metragem.ToString("N2") m²</dd>
+                <dd class="col-sm-9">@Model.Metragem.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR")) m²</dd>
 
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Quartos)</dt>
                 <dd class="col-sm-9">@Html.DisplayFor(model => model.Quartos)</dd>
@@ -33,16 +33,16 @@
                 }
 
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorVenda)</dt>
-                <dd class="col-sm-9">R$ @Model.ValorVenda.ToString("N2")</dd>
+                <dd class="col-sm-9">R$ @Model.ValorVenda.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</dd>
 
                 <dt class="col-sm-3">Valor Recebido</dt>
                 <dd class="col-sm-9">
-                    <strong class="text-success">R$ @ViewBag.ValorRecebido.ToString("N2")</strong>
+                    <strong class="text-success">R$ @ViewBag.ValorRecebido.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</strong>
                     @{
                         var valorRecebido = (decimal)ViewBag.ValorRecebido;
                         var percentual = Model.ValorVenda > 0 ? (valorRecebido / Model.ValorVenda * 100) : 0;
                     }
-                    <small class="text-muted">(@percentual.ToString("N2")% do valor de venda)</small>
+                    <small class="text-muted">(@percentual.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))% do valor de venda)</small>
                 </dd>
 
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>

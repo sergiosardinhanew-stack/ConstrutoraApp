@@ -24,7 +24,7 @@
                 <dd class="col-sm-9">@Html.DisplayFor(model => model.DataContrato)</dd>
 
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorVenda)</dt>
-                <dd class="col-sm-9">R$ @Model.ValorVenda.ToString("N2")</dd>
+                <dd class="col-sm-9">R$ @Model.ValorVenda.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</dd>
 
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FormaPagamento)</dt>
                 <dd class="col-sm-9">@Html.DisplayFor(model => model.FormaPagamento)</dd>

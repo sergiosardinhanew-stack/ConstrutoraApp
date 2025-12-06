@@ -62,7 +62,7 @@
                                         <tr>
                                             <td>@parcelamento.TipoPagamento</td>
                                             <td>@totalParcelas</td>
-                                            <td>R$ @parcelamento.ValorTotal.ToString("N2")</td>
+                                            <td>R$ @parcelamento.ValorTotal.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</td>
                                             <td>
                                                 <span class="badge @(pagamentosPagos == totalParcelas ? "bg-success" : "bg-warning text-dark")">
                                                     @pagamentosPagos / @totalParcelas
@@ -88,7 +88,7 @@
                                 <tfoot>
                                     <tr class="table-info">
                                         <th colspan="2">Total</th>
-                                        <th>R$ @(Model.Parcelamentos.Sum(p => p.ValorTotal).ToString("N2"))</th>
+                                        <th>R$ @(Model.Parcelamentos.Sum(p => p.ValorTotal).ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR")))</th>
                                         <th colspan="2"></th>
                                     </tr>
                                 </tfoot>

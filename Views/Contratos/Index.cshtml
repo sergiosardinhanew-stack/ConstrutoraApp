@@ -40,7 +40,7 @@
                         <tr>
                             <td>@Html.DisplayFor(modelItem => item.Comprador)</td>
                             <td>@Html.DisplayFor(modelItem => item.Imovel!.Numero)</td>
-                            <td>R$ @item.ValorVenda.ToString("N2")</td>
+                            <td>R$ @item.ValorVenda.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</td>
                             <td>@Html.DisplayFor(modelItem => item.DataContrato)</td>
                             <td>@Html.DisplayFor(modelItem => item.FormaPagamento)</td>
                             <td>

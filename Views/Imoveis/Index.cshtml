@@ -96,9 +96,9 @@
                             <td>@Html.DisplayFor(modelItem => item.Numero)</td>
                             <td>@Html.DisplayFor(modelItem => item.Tipo)</td>
                             <td>@Html.DisplayFor(modelItem => item.Empreendimento!.Nome)</td>
-                            <td>@item.Metragem.ToString("N2") m²</td>
+                            <td>@item.Metragem.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR")) m²</td>
                             <td>@Html.DisplayFor(modelItem => item.Quartos)</td>
-                            <td>R$ @item.ValorVenda.ToString("N2")</td>
+                            <td>R$ @item.ValorVenda.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</td>
                             <td>
                                 @{
                                     var valoresRecebidos = ViewBag.ValoresRecebidos as Dictionary<int, decimal>;
@@ -106,7 +106,7 @@
                                         ? valoresRecebidos[item.Id] 
                                         : 0;
                                 }
-                                <strong class="text-success">R$ @valorRecebido.ToString("N2")</strong>
+                                <strong class="text-success">R$ @valorRecebido.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</strong>
                             </td>
                             <td>
                                 <span class="badge bg-@(item.Status == "Vendido" ? "success" : item.Status == "Reservado" ? "warning" : "info")">

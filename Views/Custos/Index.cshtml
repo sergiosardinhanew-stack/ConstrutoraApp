@@ -43,7 +43,7 @@
                             <td>@Html.DisplayFor(modelItem => item.Descricao)</td>
                             <td>@Html.DisplayFor(modelItem => item.Tipo)</td>
                             <td>@Html.DisplayFor(modelItem => item.Empreendimento!.Nome)</td>
-                            <td>R$ @item.Valor.ToString("N2")</td>
+                            <td>R$ @item.Valor.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</td>
                             <td>@Html.DisplayFor(modelItem => item.Data)</td>
                             <td>@Html.DisplayFor(modelItem => item.Fornecedor)</td>
                             <td>

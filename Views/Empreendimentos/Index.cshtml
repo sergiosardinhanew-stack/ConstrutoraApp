@@ -37,7 +37,7 @@
                                 }
                                 @if (item.ValorPrevisto.HasValue)
                                 {
-                                    <strong>Valor Previsto:</strong> <text>R$</text> @item.ValorPrevisto.Value.ToString("N2")<br />
+                                    <strong>Valor Previsto:</strong> <text>R$</text> @item.ValorPrevisto.Value.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))<br />
                                 }
                             </p>
                             

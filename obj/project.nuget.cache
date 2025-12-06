@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zLhiocNs5YM=",
+  "dgSpecHash": "Y9pxlJYTVhY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp\\ConstrutoraApp.csproj",
+  "projectFilePath": "C:\\Users\\ex1olivese\\source\\repos\\ConstrutoraApp\\ConstrutoraApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ex1olivese\\.nuget\\packages\\humanizer\\2.14.1\\humanizer.2.14.1.nupkg.sha512",
     "C:\\Users\\ex1olivese\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

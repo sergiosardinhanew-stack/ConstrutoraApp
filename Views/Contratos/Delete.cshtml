@@ -22,7 +22,7 @@
                 <dd class="col-sm-9">@Html.DisplayFor(model => model.Imovel!.Numero)</dd>
 
                 <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorVenda)</dt>
-                <dd class="col-sm-9">R$ @Model.ValorVenda.ToString("N2")</dd>
+                <dd class="col-sm-9">R$ @Model.ValorVenda.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</dd>
             </dl>
 
             <form asp-action="Delete">

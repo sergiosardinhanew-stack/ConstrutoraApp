@@ -42,13 +42,13 @@
                 @if (Model.ValorPrevisto.HasValue)
                 {
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorPrevisto)</dt>
-                    <dd class="col-sm-9">R$ @Model.ValorPrevisto.Value.ToString("N2")</dd>
+                    <dd class="col-sm-9">R$ @Model.ValorPrevisto.Value.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</dd>
                 }
 
                 @if (Model.ValorRealizado.HasValue)
                 {
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ValorRealizado)</dt>
-                    <dd class="col-sm-9">R$ @Model.ValorRealizado.Value.ToString("N2")</dd>
+                    <dd class="col-sm-9">R$ @Model.ValorRealizado.Value.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"))</dd>
                 }
             </dl>
 
